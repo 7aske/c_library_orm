@@ -11,7 +11,7 @@ class Header:
 		elif prop.proptype == SqlType.PK_LONG:
 			return "uint id_{name};".format(name=self.struct.name)
 		elif prop.proptype == SqlType.FK_LONG:
-			return "struct {name}* {name};".format(name=prop.name)
+			return "struct {name}* {name};".format(name=prop.name[3:])
 		elif prop.proptype == SqlType.LONG:
 			return "uint id_{name};".format(name=prop.name)
 
@@ -29,6 +29,7 @@ class Header:
 		out += self.struct.declaration_execute_find().get_declaration()+"\n\n"
 		out += self.struct.declaration_update().get_declaration()+"\n\n"
 		out += self.struct.declaration_execute_update().get_declaration()+"\n\n"
+		out += self.struct.declaration_delete().get_declaration()+"\n\n"
 
 		out += "#endif\n"
 

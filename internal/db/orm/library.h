@@ -1,11 +1,8 @@
 //
 // Created by nik on 12/21/19.
 //
-
-#ifndef IT350_PZ_APP_LIBRARY_H
-#define IT350_PZ_APP_LIBRARY_H
-
-#pragma once
+#ifndef STRUCT_LIBRARY_H
+#define STRUCT_LIBRARY_H
 
 struct library {
 	uint id_library;
@@ -15,14 +12,17 @@ struct library {
 
 typedef struct library LIBRARY;
 
-extern uint library_insert(LIBRARY* libraryT);
+uint library_insert(LIBRARY* libraryT);
 
-extern int library_update(LIBRARY* libraryT);
+LIBRARY* library_find_by_id(uint id);
 
-extern int library_execute_update(char const* query, MYSQL_BIND* params, uint param_count);
+SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint param_count);
 
-extern LIBRARY* library_find_by_id(uint id);
+int library_update(LIBRARY* libraryT);
 
-extern SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint param_count);
+int library_execute_update(char const* query, MYSQL_BIND* params, uint param_count);
 
-#endif //IT350_PZ_APP_LIBRARY_H
+int library_delete(LIBRARY* libraryT);
+
+#endif
+

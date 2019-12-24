@@ -6,15 +6,15 @@
 
 
 /* Generated function */
-uint region_insert(REGION* regionT) {
+uint library_insert(LIBRARY* libraryT) {
 	#define QUERY_LENGTH 512
 	#define STRING_SIZE 255
-	#define QUERY "insert into region (name) values (?);"
-	#define PARAM_COUNT 1
+	#define QUERY "insert into library (id_address, name) values (?, ?);"
+	#define PARAM_COUNT 2
 	#define NAME_SIZE 255
 	/* Generated using get_insert_assertions() */
-	assert(regionT->id_region == 0);
-	assert(strnlen(regionT->name, STRING_SIZE) > 1);
+	assert(libraryT->id_library == 0);
+	assert(strnlen(libraryT->name, STRING_SIZE) > 1);
 
 
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -30,19 +30,28 @@ uint region_insert(REGION* regionT) {
 	memset(&param, 0, sizeof(param));
 
 	unsigned long name_len;
-	name_len = strnlen(regionT->name, NAME_SIZE);
+	name_len = strnlen(libraryT->name, NAME_SIZE);
 
 
 	/* Generated using  get_col_param_buffers() */
 
+	/* INTEGER PARAM */
+	param[0].buffer = malloc(sizeof(uint));
+	param[0].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
 	/* STRING PARAM */
-	param[0].buffer = malloc(name_len);
-	param[0].buffer_type = MYSQL_TYPE_STRING;
-	param[0].buffer_length = name_len;
-	strncpy(param[0].buffer, regionT->name, name_len);
+	param[1].buffer = malloc(name_len);
+	param[1].buffer_type = MYSQL_TYPE_STRING;
+	param[1].buffer_length = name_len;
+	strncpy(param[1].buffer, libraryT->name, name_len);
 
 	/* Generated using get_update_fk() */
 
+	if (libraryT->address->id_address == 0) {
+		address_insert(libraryT->address);
+	} else {
+		address_update(libraryT->address);
+	}
 
 	if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
 		fprintf(stderr, " mysql_stmt_prepare(), failed\n");
@@ -65,10 +74,11 @@ uint region_insert(REGION* regionT) {
 	retval = (uint) mysql_stmt_insert_id(stmt);
 	// update id after insertion;
 
-	regionT->id_region = retval;
+	libraryT->id_library = retval;
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
+	free(param[1].buffer);
 
 
 	return retval;
@@ -82,9 +92,9 @@ uint region_insert(REGION* regionT) {
 
 
 /* Generated function */
-SQL_RESULT* region_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
+SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_SIZE 512
-	#define RES_COL_COUNT 2
+	#define RES_COL_COUNT 3
 	#define BUFFER_SIZE 255
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
 	SQL_RESULT* res;
@@ -95,7 +105,8 @@ SQL_RESULT* region_execute_find(char const* query, MYSQL_BIND* params, uint para
 	unsigned long lengths[RES_COL_COUNT];
 	my_bool is_null[RES_COL_COUNT];
 	my_bool error[RES_COL_COUNT];
-	uint id_region_buffer;
+	uint id_library_buffer;
+	uint id_address_buffer;
 	char name_buffer[BUFFER_SIZE];
 
 
@@ -133,18 +144,25 @@ SQL_RESULT* region_execute_find(char const* query, MYSQL_BIND* params, uint para
 
 	/* INTEGER COLUMN */
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	param[0].buffer = &id_region_buffer;
+	param[0].buffer = &id_library_buffer;
 	param[0].is_null = &is_null[0];
 	param[0].length = &lengths[0];
 	param[0].error = &error[0];
 
-	/* STRING COLUMN */
-	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer = &name_buffer;
+	/* INTEGER COLUMN */
+	param[1].buffer_type = MYSQL_TYPE_LONG;
+	param[1].buffer = &id_address_buffer;
 	param[1].is_null = &is_null[1];
 	param[1].length = &lengths[1];
 	param[1].error = &error[1];
-	param[1].buffer_length = 255;
+
+	/* STRING COLUMN */
+	param[2].buffer_type = MYSQL_TYPE_STRING;
+	param[2].buffer = &name_buffer;
+	param[2].is_null = &is_null[2];
+	param[2].length = &lengths[2];
+	param[2].error = &error[2];
+	param[2].buffer_length = 255;
 
 
 	/* Bind the result buffers */
@@ -167,7 +185,7 @@ SQL_RESULT* region_execute_find(char const* query, MYSQL_BIND* params, uint para
 
 	res = calloc(1, sizeof(SQL_RESULT));
 	res->results = NULL;
-	res->type = REGION_E;
+	res->type = LIBRARY_E;
 	res->count = 0;
 
 
@@ -184,17 +202,22 @@ SQL_RESULT* region_execute_find(char const* query, MYSQL_BIND* params, uint para
 			}
 			curr->next = row;
 		}
-		row->data = calloc(1, sizeof(REGION));
+		row->data = calloc(1, sizeof(LIBRARY));
 
 		if (is_null[0]) {
-			((REGION*) row->data)->id_region = 0;
+			((LIBRARY*) row->data)->id_library = 0;
 		} else {
-			((REGION*) row->data)->id_region = id_region_buffer;
+			((LIBRARY*) row->data)->id_library = id_library_buffer;
 		}
 		if (is_null[1]) {
-			strcpy(((REGION*) row->data)->name, "NULL");
+			((LIBRARY*) row->data)->address = NULL;
 		} else {
-			strncpy(((REGION*) row->data)->name, name_buffer, lengths[1]);
+			((LIBRARY*) row->data)->address = address_find_by_id(id_address_buffer);
+		}
+		if (is_null[2]) {
+			strcpy(((LIBRARY*) row->data)->name, "NULL");
+		} else {
+			strncpy(((LIBRARY*) row->data)->name, name_buffer, lengths[2]);
 		}
 	}
 
@@ -216,16 +239,16 @@ SQL_RESULT* region_execute_find(char const* query, MYSQL_BIND* params, uint para
 
 
 /* Generated function */
-REGION* region_find_by_id(uint id) {
-	#define QUERY "select * from region where id_region = ?;"
+LIBRARY* library_find_by_id(uint id) {
+	#define QUERY "select * from library where id_library = ?;"
 	#define PARAM_COUNT 1
-	REGION* out;
+	LIBRARY* out;
 
 
 	SQL_RESULT* res;
-	struct region region;
-	region.id_region = id;
-	struct region* regionT = &region;
+	struct library library;
+	library.id_library = id;
+	struct library* libraryT = &library;
 
 
 	/* Generated using  get_col_param_buffers() */
@@ -235,9 +258,9 @@ REGION* region_find_by_id(uint id) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &regionT->id_region, sizeof(uint));
+	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
 
-	res = region_execute_find(QUERY, param, PARAM_COUNT);
+	res = library_execute_find(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
@@ -249,7 +272,7 @@ REGION* region_find_by_id(uint id) {
 		free(res);
 		return out;
 	} else {
-		fprintf(stderr, "region_execute_find(), failed - multiple results (%d)\n", res->count);
+		fprintf(stderr, "library_execute_find(), failed - multiple results (%d)\n", res->count);
 		mysql_res_free(&res);
 		return NULL;
 	}
@@ -260,12 +283,12 @@ REGION* region_find_by_id(uint id) {
 
 
 /* Generated function */
-int region_update(REGION* regionT) {
-	#define QUERY "update region set name = ? where id_region = ?;"
-	#define PARAM_COUNT 2
+int library_update(LIBRARY* libraryT) {
+	#define QUERY "update library set id_address = ?, name = ? where id_library = ?;"
+	#define PARAM_COUNT 3
 	#define STRING_SIZE 255
 	#define NAME_SIZE 255
-	assert(regionT->id_region != 0);
+	assert(libraryT->id_library != 0);
 
 	int retval;
 
@@ -274,23 +297,28 @@ int region_update(REGION* regionT) {
 	memset(&param, 0, sizeof(param));
 
 	unsigned long name_len;
-	name_len = strnlen(regionT->name, NAME_SIZE);
+	name_len = strnlen(libraryT->name, NAME_SIZE);
 
-	/* STRING PARAM */
-	param[0].buffer = malloc(name_len);
-	param[0].buffer_type = MYSQL_TYPE_STRING;
-	param[0].buffer_length = name_len;
-	strncpy(param[0].buffer, regionT->name, name_len);
 	/* INTEGER PARAM */
-	param[1].buffer = malloc(sizeof(uint));
-	param[1].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[1].buffer, &regionT->id_region, sizeof(uint));
+	param[0].buffer = malloc(sizeof(uint));
+	param[0].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
+	/* STRING PARAM */
+	param[1].buffer = malloc(name_len);
+	param[1].buffer_type = MYSQL_TYPE_STRING;
+	param[1].buffer_length = name_len;
+	strncpy(param[1].buffer, libraryT->name, name_len);
+	/* INTEGER PARAM */
+	param[2].buffer = malloc(sizeof(uint));
+	param[2].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[2].buffer, &libraryT->id_library, sizeof(uint));
 
-	retval = region_execute_update(QUERY, param, PARAM_COUNT);
+	retval = library_execute_update(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_buffer_free() */
 	free(param[0].buffer);
 	free(param[1].buffer);
+	free(param[2].buffer);
 
 
 	return retval;
@@ -303,7 +331,7 @@ int region_update(REGION* regionT) {
 
 
 /* Generated function */
-int region_execute_update(char const* query, MYSQL_BIND* params, uint param_count) {
+int library_execute_update(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_LENGTH 512
 	MYSQL_STMT* stmt;
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -337,4 +365,34 @@ int region_execute_update(char const* query, MYSQL_BIND* params, uint param_coun
 	}
 
 	#undef QUERY_LENGTH
+}
+
+
+/* Generated function */
+int library_delete(LIBRARY* libraryT) {
+	#define QUERY "delete from library where id_library = ?;"
+	#define PARAM_COUNT 1
+	assert(libraryT->id_library != 0);
+
+	int retval;
+
+	/* Generated using  get_col_param_buffers() */
+	MYSQL_BIND param[PARAM_COUNT];
+	memset(param, 0, sizeof(param));
+
+	/* INTEGER PARAM */
+	param[0].buffer = malloc(sizeof(uint));
+	param[0].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
+
+	retval = library_execute_update(QUERY, param, PARAM_COUNT);
+
+	/* Generated using col_param_buffer_free() */
+	free(param[0].buffer);
+
+
+	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
 }

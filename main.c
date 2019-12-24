@@ -6,7 +6,7 @@ int main() {
 	REGION region1 = {0, "Ontario"};
 	MUNICIPALITY municipality1 = {0, "Waterloo", &region1};
 	ADDRESS address1 = {0, NULL, "Cambridge", "CB2 1TJ"};
-	LIBRARY library1 = {0, NULL, "Wren Library"};
+	LIBRARY library1 = {2, NULL, "Wren Library"};
 	LIBRARY* library;
 	ADDRESS* address;
 	REGION* region;
@@ -18,6 +18,7 @@ int main() {
 	printf("ADDRESS %d %s %s\n", library->address->id_address, library->address->street, library->address->number);
 	printf("MUNICIPALITY %d %s (%d %s)\n", library->address->municipality->id_municipality, library->address->municipality->name,
 		   library->address->municipality->region->id_region, library->address->municipality->region->name);
+	printf("DELETE: %d \n", library_delete(&library1));
 	// region = region_find_by_id(11U);
 	// region2 = region_find_by_id(102U);
 	// printf("REGION %d %s\n", region->id_region, region->name);

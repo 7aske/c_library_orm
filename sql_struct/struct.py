@@ -347,6 +347,13 @@ class Struct:
 		# noinspection SqlResolve
 		return f'select * from {self.name} where id_{self.name} = ?;'
 
+	def delete_sql_string(self):
+		"""
+		Generates 'DELETE' SQL command for respective struct that deletes by ID.
+		"""
+		# noinspection SqlResolve
+		return f'delete from {self.name} where id_{self.name} = ?;'
+
 	def genereate_h(self):
 		return str(Header(self))
 
@@ -359,6 +366,7 @@ class Struct:
 		find_by_id_func = self.template_find_by_id()
 		update_func = self.template_update()
 		execute_update_func = self.template_execute_update()
+		delete_func = self.template_delete()
 
 		with open("out/{name}.c".format(name=self.name), "w") as file:
 			file.write(str(insert_func))
@@ -366,6 +374,7 @@ class Struct:
 			file.write(str(find_by_id_func))
 			file.write(str(update_func))
 			file.write(str(execute_update_func))
+			file.write(str(delete_func))
 		with open("out/{name}.h".format(name=self.name), "w") as file:
 			file.write(self.genereate_h())
 
@@ -530,6 +539,23 @@ class Struct:
 		func.add_block(self.col_update_params(func))
 		func.add_block("retval = {}_execute_update(QUERY, param, PARAM_COUNT);".format(self.name))
 		func.add_block(self.col_buffer_free())
+		func.add_block("return retval;")
+		return func
+
+	def declaration_delete(self):
+		arg_list = [FunctionArgument("{}*".format(self.typedef_name), "{}T".format(self.name))]
+		return FunctionTemplate("{}_delete".format(self.name), "int", arg_list)
+
+	def template_delete(self):
+		func = self.declaration_delete()
+		func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(self.delete_sql_string())))
+		func.add_macro_def(MacroDefinition("PARAM_COUNT", str(1)))
+		func.add_block("assert({name}T->id_{name} != 0);".format(name=self.name))
+		func.add_block("""int retval;""")
+		func.add_block(self.get_col_param_buffer(["id_{}".format(self.name)]))
+		func.add_block("retval = {}_execute_update(QUERY, param, PARAM_COUNT);".format(self.name))
+		func.add_block(self.col_param_buffer_free(1))
+
 		func.add_block("return retval;")
 		return func
 
