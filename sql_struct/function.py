@@ -34,10 +34,24 @@ class FunctionTemplate:
 		self.body = blocks
 
 	def add_body(self, blocks: List[str]):
-		self.body += blocks
+		for block in blocks:
+			self.add_block(block)
 
 	def add_block(self, block: str):
-		self.body.append(block)
+		formatted = []
+		block = block.replace("\t", "")
+		block = block.lstrip(" ")
+		tabcount = 1
+		for line in block.split("\n"):
+			if '}' in line:
+				tabcount -= 1
+			line = "\t" * tabcount + line
+			if '{' in line:
+				tabcount += 1
+
+			formatted.append(line)
+
+		self.body.append("\n".join(formatted))
 
 	def add_argument(self, argument: FunctionArgument):
 		self.arguments.append(argument)
@@ -60,13 +74,17 @@ class FunctionTemplate:
 	def add_macro_defs(self, defs: List[MacroDefinition]):
 		self.macro_def += defs
 
+	def get_declaration(self):
+		return "{return_type} {name}({arguments});".format(return_type=self.ret_type, name=self.name,
+		                                                   arguments=self.get_arguments_str())
+
 	def __str__(self):
-		out = "/* Generated function */\n"
-		out += "{return_type} {name}({arguments}){{\n".format(return_type=self.ret_type, name=self.name,
+		out = "\n\n/* Generated function */\n"
+		out += "{return_type} {name}({arguments}) {{\n".format(return_type=self.ret_type, name=self.name,
 		                                                      arguments=self.get_arguments_str())
 		out += "".join([macro.__str__() for macro in self.macro_def])
-		out += "\n".join(block for block in self.body)
-		out += "\n"
+		out += "\n\n".join(block for block in self.body)
+		out += "\n\n"
 		out += "".join([macro.undef() for macro in self.macro_def])
-		out += "}"
+		out += "}\n"
 		return out
