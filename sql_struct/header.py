@@ -14,6 +14,8 @@ class Header:
 			return "struct {name}* {name};".format(name=prop.name[3:])
 		elif prop.proptype == SqlType.LONG:
 			return "uint {name};".format(name=prop.name)
+		elif prop.proptype == SqlType.DATE:
+			return "struct tm {name};".format(name=prop.name)
 
 	def __str__(self):
 		assert len(self.struct.methods) > 0

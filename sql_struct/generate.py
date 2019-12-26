@@ -46,6 +46,8 @@ def main():
 				col_type_sql = SqlType.VARCHAR
 			elif col_type == "int":
 				col_type_sql = SqlType.LONG
+			elif col_type == "date":
+				col_type_sql = SqlType.DATE
 
 			if "foreignKeys" in table.keys():
 				if {"column": col_name} in [fk["columns"][0] for fk in table["foreignKeys"]]:

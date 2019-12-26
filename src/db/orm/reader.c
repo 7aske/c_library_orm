@@ -16,7 +16,7 @@ uint reader_insert(READER* readerT) {
 	#define USERNAME_SIZE 255
 	#define PASSWORD_SIZE 255
 	/* Generated using get_insert_assertions() */
-	assert(readerT->id_user == 0);
+	assert(readerT->id_reader == 0);
 	assert(strnlen(readerT->username, STRING_SIZE) > 1);
 	assert(strnlen(readerT->password, STRING_SIZE) > 1);
 	
@@ -77,7 +77,7 @@ uint reader_insert(READER* readerT) {
 	retval = (uint) mysql_stmt_insert_id(stmt);
 
 	// update id after insertion;
-	readerT->id_user = retval;
+	readerT->id_reader = retval;
 	
 
 	/* Generated using col_param_buffer_free() */
@@ -110,7 +110,7 @@ SQL_RESULT* reader_execute_find(char const* query, MYSQL_BIND* params, uint para
 	unsigned long lengths[RES_COL_COUNT];
 	my_bool is_null[RES_COL_COUNT];
 	my_bool error[RES_COL_COUNT];
-	uint id_user_buffer;
+	uint id_reader_buffer;
 	char username_buffer[BUFFER_SIZE];
 	char password_buffer[BUFFER_SIZE];
 	
@@ -149,7 +149,7 @@ SQL_RESULT* reader_execute_find(char const* query, MYSQL_BIND* params, uint para
 	
 	/* INTEGER COLUMN */
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	param[0].buffer = &id_user_buffer;
+	param[0].buffer = &id_reader_buffer;
 	param[0].is_null = &is_null[0];
 	param[0].length = &lengths[0];
 	param[0].error = &error[0];
@@ -211,9 +211,9 @@ SQL_RESULT* reader_execute_find(char const* query, MYSQL_BIND* params, uint para
 		row->data = calloc(1, sizeof(READER));
 		
 		if (is_null[0]) {
-			((READER*) row->data)->id_user = 0;
+			((READER*) row->data)->id_reader = 0;
 		} else {
-			((READER*) row->data)->id_user = id_user_buffer;
+			((READER*) row->data)->id_reader = id_reader_buffer;
 		}
 		if (is_null[1]) {
 			strcpy(((READER*) row->data)->username, "NULL");
@@ -253,7 +253,7 @@ READER* reader_find_by_id(uint id) {
 	
 	SQL_RESULT* res;
 	struct reader reader;
-	reader.id_user = id;
+	reader.id_reader = id;
 	struct reader* readerT = &reader;
 	
 
@@ -261,6 +261,10 @@ READER* reader_find_by_id(uint id) {
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(param, 0, sizeof(param));
 	
+	/* INTEGER PARAM */
+	param[0].buffer = malloc(sizeof(uint));
+	param[0].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[0].buffer, &readerT->id_reader, sizeof(uint));
 
 	res = reader_execute_find(QUERY, param, PARAM_COUNT);
 
@@ -291,7 +295,7 @@ int reader_update(READER* readerT) {
 	#define STRING_SIZE 255
 	#define USERNAME_SIZE 255
 	#define PASSWORD_SIZE 255
-	assert(readerT->id_user != 0);
+	assert(readerT->id_reader != 0);
 
 	int retval;
 
@@ -318,7 +322,7 @@ int reader_update(READER* readerT) {
 	/* INTEGER PARAM */
 	param[2].buffer = malloc(sizeof(uint));
 	param[2].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[2].buffer, &readerT->id_user, sizeof(uint));
+	memcpy(param[2].buffer, &readerT->id_reader, sizeof(uint));
 
 	retval = reader_execute(QUERY, param, PARAM_COUNT);
 
@@ -380,7 +384,7 @@ int reader_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 int reader_delete(READER* readerT) {
 	#define QUERY "delete from reader where id_reader = ?;"
 	#define PARAM_COUNT 1
-	assert(readerT->id_user != 0);
+	assert(readerT->id_reader != 0);
 
 	int retval;
 
@@ -388,6 +392,10 @@ int reader_delete(READER* readerT) {
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(param, 0, sizeof(param));
 	
+	/* INTEGER PARAM */
+	param[0].buffer = malloc(sizeof(uint));
+	param[0].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[0].buffer, &readerT->id_reader, sizeof(uint));
 
 	retval = reader_execute(QUERY, param, PARAM_COUNT);
 

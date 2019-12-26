@@ -11,8 +11,8 @@
 uint book_insert(BOOK* bookT) {
 	#define QUERY_LENGTH 512
 	#define STRING_SIZE 255
-	#define QUERY "insert into book (isbn, name) values (?, ?);"
-	#define PARAM_COUNT 2
+	#define QUERY "insert into book (isbn, name, publish_date) values (?, ?, ?);"
+	#define PARAM_COUNT 3
 	#define ISBN_SIZE 32
 	#define NAME_SIZE 255
 	/* Generated using get_insert_assertions() */
@@ -55,6 +55,10 @@ uint book_insert(BOOK* bookT) {
 	param[1].buffer_type = MYSQL_TYPE_STRING;
 	param[1].buffer_length = name_len;
 	strncpy(param[1].buffer, bookT->name, name_len);
+	/* DATE PARAM */
+	param[2].buffer = malloc(56);
+	param[2].buffer_type = MYSQL_TYPE_DATE;
+	mysql_timecpy(param[2].buffer, &bookT->publish_date);
 
 	if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
 		fprintf(stderr, " mysql_stmt_prepare(), failed\n");
@@ -83,6 +87,7 @@ uint book_insert(BOOK* bookT) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	free(param[1].buffer);
+	free(param[2].buffer);
 	
 
 	return retval;
@@ -99,7 +104,7 @@ uint book_insert(BOOK* bookT) {
 /* Generated function */
 SQL_RESULT* book_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_SIZE 512
-	#define RES_COL_COUNT 3
+	#define RES_COL_COUNT 4
 	#define BUFFER_SIZE 255
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
 	SQL_RESULT* res;
@@ -113,6 +118,7 @@ SQL_RESULT* book_execute_find(char const* query, MYSQL_BIND* params, uint param_
 	uint id_book_buffer;
 	char isbn_buffer[BUFFER_SIZE];
 	char name_buffer[BUFFER_SIZE];
+	char publish_date_buffer[BUFFER_SIZE];
 	
 
 	conn = db_init();
@@ -170,6 +176,14 @@ SQL_RESULT* book_execute_find(char const* query, MYSQL_BIND* params, uint param_
 	param[2].error = &error[2];
 	param[2].buffer_length = 255;
 	
+	/* DATE COLUMN */
+	param[3].buffer_type = MYSQL_TYPE_STRING;
+	param[3].buffer = &publish_date_buffer;
+	param[3].is_null = &is_null[3];
+	param[3].length = &lengths[3];
+	param[3].error = &error[3];
+	param[3].buffer_length = BUFFER_SIZE;
+	
 
 	/* Bind the result buffers */
 	if (mysql_stmt_bind_result(stmt, param)) {
@@ -224,6 +238,11 @@ SQL_RESULT* book_execute_find(char const* query, MYSQL_BIND* params, uint param_
 			strcpy(((BOOK*) row->data)->name, "NULL");
 		} else {
 			strncpy(((BOOK*) row->data)->name, name_buffer, lengths[2]);
+		}
+		if (is_null[3]) {
+			// strcpy(((BOOK*) row->data)->publish_date, "NULL");
+		} else {
+			mysql_timecpystr(&((BOOK*) row->data)->publish_date, publish_date_buffer);
 		}
 	}
 
@@ -290,8 +309,8 @@ BOOK* book_find_by_id(uint id) {
 
 /* Generated function */
 int book_update(BOOK* bookT) {
-	#define QUERY "update book set isbn = ?, name = ? where id_book = ?;"
-	#define PARAM_COUNT 3
+	#define QUERY "update book set isbn = ?, name = ?, publish_date = ? where id_book = ?;"
+	#define PARAM_COUNT 4
 	#define STRING_SIZE 255
 	#define ISBN_SIZE 32
 	#define NAME_SIZE 255
@@ -319,10 +338,14 @@ int book_update(BOOK* bookT) {
 	param[1].buffer_type = MYSQL_TYPE_STRING;
 	param[1].buffer_length = name_len;
 	strncpy(param[1].buffer, bookT->name, name_len);
+	/* DATE PARAM */
+	param[2].buffer = malloc(56);
+	param[2].buffer_type = MYSQL_TYPE_DATE;
+	mysql_timecpy(param[2].buffer, &bookT->publish_date);
 	/* INTEGER PARAM */
-	param[2].buffer = malloc(sizeof(uint));
-	param[2].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[2].buffer, &bookT->id_book, sizeof(uint));
+	param[3].buffer = malloc(sizeof(uint));
+	param[3].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[3].buffer, &bookT->id_book, sizeof(uint));
 
 	retval = book_execute(QUERY, param, PARAM_COUNT);
 
@@ -330,6 +353,7 @@ int book_update(BOOK* bookT) {
 	free(param[0].buffer);
 	free(param[1].buffer);
 	free(param[2].buffer);
+	free(param[3].buffer);
 	
 
 	return retval;

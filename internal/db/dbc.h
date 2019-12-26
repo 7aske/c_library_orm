@@ -20,8 +20,9 @@
 
 #include <mysql/mysql.h>
 
-#include "db/orm/entity.h"
+#include "db/util.h"
 #include "db/sql_result.h"
+#include "db/orm/entity.h"
 
 extern MYSQL*
 db_init();

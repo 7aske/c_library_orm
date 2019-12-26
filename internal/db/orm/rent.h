@@ -8,6 +8,7 @@ struct rent {
 	uint id_rent;
 	struct reader* reader;
 	struct book_specimen* book_specimen;
+	struct tm due_date;
 };
 
 typedef struct rent RENT;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 #include "db/dbc.h"
 
@@ -7,6 +8,7 @@ int main() {
 	MUNICIPALITY municipality1 = {0, &region1, "Waterloo",};
 	ADDRESS address1 = {0, &municipality1, "Cambridge", "CB2 1TJ"};
 	LIBRARY library1 = {0, &address1, "Wren Library"};
+	BOOK book1 = {.name="Harry Potter and the Chamber of Secrets", .id_book=0, .isbn="1241tgr21", .publish_date={.tm_year=2002, .tm_mon=7, .tm_mday=23}};
 	LIBRARY* library;
 	EMPLOYEE* employee;
 	ADDRESS* address;
@@ -26,8 +28,12 @@ int main() {
 	};
 	employee = employee_find_by_id(1U);
 	// book = book_find_by_id(1U);
-	printf("EMPLOYEE %d %s %s %s", employee->id_employee, employee->person->first_name, employee->person->last_name,
+	printf("EMPLOYEE %d %s %s %s\n", employee->id_employee, employee->person->first_name, employee->person->last_name,
 		   employee->position);
+	book = book_find_by_id(1U);
+	printf("BOOK %d %s %d/%d/%d\n", book->id_book, book->name, book->publish_date.tm_year, book->publish_date.tm_mon,
+		   book->publish_date.tm_mday);
+	// book_insert(&book1);
 	// printf("BOOK %d %s %s %s", book->id_book, book->name, book->isbn);
 	// employee_insert(&e1);
 

@@ -11,8 +11,8 @@
 uint rent_insert(RENT* rentT) {
 	#define QUERY_LENGTH 512
 	#define STRING_SIZE 255
-	#define QUERY "insert into rent (id_user, id_book_specimen) values (?, ?);"
-	#define PARAM_COUNT 2
+	#define QUERY "insert into rent (id_reader, id_book_specimen, due_date) values (?, ?, ?);"
+	#define PARAM_COUNT 3
 	/* Generated using get_insert_assertions() */
 	assert(rentT->id_rent == 0);
 	
@@ -27,7 +27,7 @@ uint rent_insert(RENT* rentT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (rentT->reader->id_user == 0) {
+	if (rentT->reader->id_reader == 0) {
 		reader_insert(rentT->reader);
 	} else {
 		reader_update(rentT->reader);
@@ -48,11 +48,15 @@ uint rent_insert(RENT* rentT) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &rentT->reader->id_user, sizeof(uint));
+	memcpy(param[0].buffer, &rentT->reader->id_reader, sizeof(uint));
 	/* INTEGER PARAM */
 	param[1].buffer = malloc(sizeof(uint));
 	param[1].buffer_type = MYSQL_TYPE_LONG;
 	memcpy(param[1].buffer, &rentT->book_specimen->id_book_specimen, sizeof(uint));
+	/* DATE PARAM */
+	param[2].buffer = malloc(56);
+	param[2].buffer_type = MYSQL_TYPE_DATE;
+	mysql_timecpy(param[2].buffer, &rentT->due_date);
 
 	if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
 		fprintf(stderr, " mysql_stmt_prepare(), failed\n");
@@ -81,6 +85,7 @@ uint rent_insert(RENT* rentT) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	free(param[1].buffer);
+	free(param[2].buffer);
 	
 
 	return retval;
@@ -95,7 +100,7 @@ uint rent_insert(RENT* rentT) {
 /* Generated function */
 SQL_RESULT* rent_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_SIZE 512
-	#define RES_COL_COUNT 3
+	#define RES_COL_COUNT 4
 	#define BUFFER_SIZE 255
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
 	SQL_RESULT* res;
@@ -107,8 +112,9 @@ SQL_RESULT* rent_execute_find(char const* query, MYSQL_BIND* params, uint param_
 	my_bool is_null[RES_COL_COUNT];
 	my_bool error[RES_COL_COUNT];
 	uint id_rent_buffer;
-	uint id_user_buffer;
+	uint id_reader_buffer;
 	uint id_book_specimen_buffer;
+	char due_date_buffer[BUFFER_SIZE];
 	
 
 	conn = db_init();
@@ -152,7 +158,7 @@ SQL_RESULT* rent_execute_find(char const* query, MYSQL_BIND* params, uint param_
 	
 	/* INTEGER COLUMN */
 	param[1].buffer_type = MYSQL_TYPE_LONG;
-	param[1].buffer = &id_user_buffer;
+	param[1].buffer = &id_reader_buffer;
 	param[1].is_null = &is_null[1];
 	param[1].length = &lengths[1];
 	param[1].error = &error[1];
@@ -163,6 +169,14 @@ SQL_RESULT* rent_execute_find(char const* query, MYSQL_BIND* params, uint param_
 	param[2].is_null = &is_null[2];
 	param[2].length = &lengths[2];
 	param[2].error = &error[2];
+	
+	/* DATE COLUMN */
+	param[3].buffer_type = MYSQL_TYPE_STRING;
+	param[3].buffer = &due_date_buffer;
+	param[3].is_null = &is_null[3];
+	param[3].length = &lengths[3];
+	param[3].error = &error[3];
+	param[3].buffer_length = BUFFER_SIZE;
 	
 
 	/* Bind the result buffers */
@@ -212,12 +226,17 @@ SQL_RESULT* rent_execute_find(char const* query, MYSQL_BIND* params, uint param_
 		if (is_null[1]) {
 			((RENT*) row->data)->reader = NULL;
 		} else {
-			((RENT*) row->data)->reader = reader_find_by_id(id_user_buffer);
+			((RENT*) row->data)->reader = reader_find_by_id(id_reader_buffer);
 		}
 		if (is_null[2]) {
 			((RENT*) row->data)->book_specimen = NULL;
 		} else {
 			((RENT*) row->data)->book_specimen = book_specimen_find_by_id(id_book_specimen_buffer);
+		}
+		if (is_null[3]) {
+			// strcpy(((RENT*) row->data)->due_date, "NULL");
+		} else {
+			mysql_timecpystr(&((RENT*) row->data)->due_date, due_date_buffer);
 		}
 	}
 
@@ -284,8 +303,8 @@ RENT* rent_find_by_id(uint id) {
 
 /* Generated function */
 int rent_update(RENT* rentT) {
-	#define QUERY "update rent set id_user = ?, id_book_specimen = ? where id_rent = ?;"
-	#define PARAM_COUNT 3
+	#define QUERY "update rent set id_reader = ?, id_book_specimen = ?, due_date = ? where id_rent = ?;"
+	#define PARAM_COUNT 4
 	#define STRING_SIZE 255
 	assert(rentT->id_rent != 0);
 
@@ -298,15 +317,19 @@ int rent_update(RENT* rentT) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &rentT->reader->id_user, sizeof(uint));
+	memcpy(param[0].buffer, &rentT->reader->id_reader, sizeof(uint));
 	/* INTEGER PARAM */
 	param[1].buffer = malloc(sizeof(uint));
 	param[1].buffer_type = MYSQL_TYPE_LONG;
 	memcpy(param[1].buffer, &rentT->book_specimen->id_book_specimen, sizeof(uint));
+	/* DATE PARAM */
+	param[2].buffer = malloc(56);
+	param[2].buffer_type = MYSQL_TYPE_DATE;
+	mysql_timecpy(param[2].buffer, &rentT->due_date);
 	/* INTEGER PARAM */
-	param[2].buffer = malloc(sizeof(uint));
-	param[2].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[2].buffer, &rentT->id_rent, sizeof(uint));
+	param[3].buffer = malloc(sizeof(uint));
+	param[3].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[3].buffer, &rentT->id_rent, sizeof(uint));
 
 	retval = rent_execute(QUERY, param, PARAM_COUNT);
 
@@ -314,6 +337,7 @@ int rent_update(RENT* rentT) {
 	free(param[0].buffer);
 	free(param[1].buffer);
 	free(param[2].buffer);
+	free(param[3].buffer);
 	
 
 	return retval;

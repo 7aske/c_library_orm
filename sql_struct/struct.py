@@ -54,7 +54,7 @@ class Struct:
 		my_bool error[RES_COL_COUNT];\n"""
 		for prop in self.members:
 			out += "\t"
-			if prop.proptype == SqlType.VARCHAR:
+			if prop.proptype in [SqlType.VARCHAR, SqlType.DATE]:
 				out += "char {col}_buffer[BUFFER_SIZE];\n".format(col=prop.name)
 			elif prop.proptype in [SqlType.LONG, SqlType.FK_LONG, SqlType.PK_LONG]:
 				out += "uint {col}_buffer;\n".format(col=prop.name)
@@ -93,6 +93,11 @@ class Struct:
 			mysql_type = "MYSQL_TYPE_STRING"
 			out += "param[{index}].buffer_length = {len};\n".format(index=index, len=prop.size)
 
+		elif prop.proptype == SqlType.DATE:
+			reg_type = "DATE"
+			mysql_type = "MYSQL_TYPE_STRING"
+			out += "param[{index}].buffer_length = BUFFER_SIZE;\n"
+
 		elif prop.proptype in [SqlType.LONG, SqlType.FK_LONG, SqlType.PK_LONG]:
 			reg_type = "INTEGER"
 			mysql_type = "MYSQL_TYPE_LONG"
@@ -116,6 +121,13 @@ class Struct:
 						strcpy((({name}*) row->data)->{col}, "NULL");
 					}} else {{
 						strncpy((({name}*) row->data)->{col}, {col}_buffer, lengths[{index}]);
+					}}""".format(index=i, col=prop.name, name=self.typedef_name)
+			elif prop.proptype == SqlType.DATE:
+				cols += """
+					if (is_null[{index}]) {{
+						// strcpy((({name}*) row->data)->{col}, "NULL");
+					}} else {{
+						mysql_timecpystr(&(({name}*) row->data)->{col}, {col}_buffer);
 					}}""".format(index=i, col=prop.name, name=self.typedef_name)
 			elif prop.proptype in [SqlType.LONG, SqlType.PK_LONG]:
 				cols += """
@@ -201,12 +213,14 @@ class Struct:
 		reg_type = None
 		mysql_type = None
 		buffer_size = None
+
 		if prop.proptype == SqlType.VARCHAR:
 			reg_type = "STRING"
 			mysql_type = "MYSQL_TYPE_STRING"
 			buffer_size = "{col}_len".format(col=prop.name)
 			out += """param[{index}].buffer_length = {col}_len;
 				strncpy(param[{index}].buffer, {name}T->{col}, {col}_len);"""
+
 		elif prop.proptype in [SqlType.LONG, SqlType.PK_LONG]:
 			reg_type = "INTEGER"
 			mysql_type = "MYSQL_TYPE_LONG"
@@ -218,6 +232,12 @@ class Struct:
 			mysql_type = "MYSQL_TYPE_LONG"
 			buffer_size = "sizeof(uint)"
 			out += "memcpy(param[{index}].buffer, &{name}T->{col_fk}->{col}, {buffer_size});"
+
+		elif prop.proptype == SqlType.DATE:
+			reg_type = "DATE"
+			mysql_type = "MYSQL_TYPE_DATE"
+			buffer_size = "{}".format(prop.size)
+			out += "mysql_timecpy(param[{index}].buffer, &{name}T->{col});"
 
 		assert reg_type is not None
 		assert mysql_type is not None

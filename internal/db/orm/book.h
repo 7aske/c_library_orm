@@ -8,6 +8,7 @@ struct book {
 	uint id_book;
 	char isbn[32];
 	char name[255];
+	struct tm publish_date;
 };
 
 typedef struct book BOOK;

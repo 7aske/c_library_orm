@@ -5,7 +5,7 @@
 #define __nik_DB_STRUCT_READER_H
 
 struct reader {
-	uint id_user;
+	uint id_reader;
 	char username[255];
 	char password[255];
 };
