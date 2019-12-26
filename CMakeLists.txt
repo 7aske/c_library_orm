@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 project(it350_pz_app C)
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(TARGET it350_pz_app)
 
 include_directories(internal include)
 add_subdirectory(src)
 
-add_executable(${TARGET} main.c ./src/dbc.c src/db/orm/entity.c src/db/orm/region.c src/db/orm/municipality.c src/db/orm/address.c src/db/orm/library.c)
+file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
+add_executable(${TARGET} main.c ${SOURCES})
 
 execute_process(COMMAND mysql_config --cflags
         OUTPUT_VARIABLE MYSQL_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)

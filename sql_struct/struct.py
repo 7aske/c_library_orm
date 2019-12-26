@@ -1,8 +1,7 @@
 from typing import List
 
-from header import Header
 from sql_types import SqlType, SqlColumn
-from function import FunctionTemplate, FunctionArgument, MacroDefinition
+from function import FunctionTemplate, MacroDefinition
 
 
 class Prop:
@@ -13,12 +12,13 @@ class Prop:
 
 class Struct:
 	def __init__(self, name: str, columns: List[SqlColumn]):
-		assert columns[0].proptype == SqlType.PK_LONG
+		# assert columns[0].proptype == SqlType.PK_LONG
 
 		self.members = columns
 		self.name = name
 		self.typedef_name = name.upper()
 		self.enum_name = name.upper() + "_E"
+		self.methods: List[FunctionTemplate] = []
 
 	def __getitem__(self, key) -> SqlColumn:
 		return self.members[key]
@@ -292,7 +292,7 @@ class Struct:
 
 	def col_update_params(self, func_ref: FunctionTemplate):
 		"""
-		Allocates and bind param buffers used in execute_update methods.
+		Allocates and bind param buffers used in execute methods.
 		Be sure to free allocated buffers with col_param_buffer_free().
 		"""
 		out = "/* Generated using col_update_params() */\n"
@@ -315,7 +315,8 @@ class Struct:
 		out = "/* Generated using get_insert_assertions() */\n"
 		for prop in self.members:
 			if prop.proptype == SqlType.PK_LONG:
-				out += "assert({name}T->id_{name} == 0);\n".format(name=self.name)
+				if self.get_pk() is not None:
+					out += "assert({name}T->{pk_name} == 0);\n".format(name=self.name, pk_name=self.get_pk().name)
 			elif prop.proptype == SqlType.VARCHAR:
 				out += "assert(strnlen({name}T->{prop_name}, STRING_SIZE) > 1);\n".format(name=self.name,
 				                                                                          prop_name=prop.name)
@@ -325,298 +326,7 @@ class Struct:
 		return [prop for prop in self.members[1:]]
 
 	def get_pk(self):
-		return self.members[0]
-
-	def insert_sql_string(self):
-		"""
-		Generates 'INSERT' SQL command for respective struct.
-		"""
-		return f'insert into {self.name} ({", ".join([param.name for param in self.get_params()])}) values ({", ".join(("?" * self.param_count()))});'
-
-	def update_sql_string(self):
-		"""
-		Generates 'UPDATE' SQL command for respective struct.
-		"""
-		# noinspection SqlResolve
-		return f'update {self.name} set {", ".join([param.name + " = ?" for param in self.get_params()])} where id_{self.name} = ?;'
-
-	def find_by_id_sql_string(self):
-		"""
-		Generates 'SELECT' SQL command for respective struct that finds by ID.
-		"""
-		# noinspection SqlResolve
-		return f'select * from {self.name} where id_{self.name} = ?;'
-
-	def delete_sql_string(self):
-		"""
-		Generates 'DELETE' SQL command for respective struct that deletes by ID.
-		"""
-		# noinspection SqlResolve
-		return f'delete from {self.name} where id_{self.name} = ?;'
-
-	def genereate_h(self):
-		return str(Header(self))
-
-	def save_to_file(self):
-		"""
-		Saves all structs methods to file '{name}.c'.
-		"""
-		insert_func = self.template_insert()
-		execute_find_func = self.template_execute_find()
-		find_by_id_func = self.template_find_by_id()
-		update_func = self.template_update()
-		execute_update_func = self.template_execute_update()
-		delete_func = self.template_delete()
-
-		with open("out/{name}.c".format(name=self.name), "w") as file:
-			file.write(str(insert_func))
-			file.write(str(execute_find_func))
-			file.write(str(find_by_id_func))
-			file.write(str(update_func))
-			file.write(str(execute_update_func))
-			file.write(str(delete_func))
-		with open("out/{name}.h".format(name=self.name), "w") as file:
-			file.write(self.genereate_h())
-
-	def declaration_execute_find(self):
-		arg_list = [FunctionArgument("char const*", "query"),
-		            FunctionArgument("MYSQL_BIND*", "params"),
-		            FunctionArgument("uint", "param_count")]
-		func = FunctionTemplate("{name}_execute_find".format(name=self.name), "SQL_RESULT*", arg_list)
-		return func
-
-	def template_execute_find(self):
-		func = self.declaration_execute_find()
-
-		func.add_macro_def(MacroDefinition("QUERY_SIZE", "512"))
-		func.add_macro_def(MacroDefinition("RES_COL_COUNT", str(self.col_count())))
-		func.add_macro_def(MacroDefinition("BUFFER_SIZE", "255"))
-		func.add_block("""MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
-		SQL_RESULT* res;
-		MYSQL_RES* prepare_meta_result;
-		MYSQL_STMT* stmt;""")
-		func.add_block(self.get_col_buffer_definitions())
-		func.add_block("""conn = db_init();
-			stmt = mysql_stmt_init(conn);
-		""")
-		func.add_block("""if (mysql_stmt_prepare(stmt, query, strnlen(query, QUERY_SIZE))) {
-				fprintf(stderr, " mysql_stmt_prepare(), SELECT failed\\n");
-				fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-				return NULL;
-			}
-			mysql_stmt_bind_param(stmt, params);
-			assert(param_count == mysql_stmt_param_count(stmt));""")
-		func.add_block("""/* Fetch result set meta information */
-			prepare_meta_result = mysql_stmt_result_metadata(stmt);
-			if (!prepare_meta_result) {
-				fprintf(stderr, " mysql_stmt_result_metadata(), returned no meta information\\n");
-				fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-				return NULL;
-			}
-			assert(RES_COL_COUNT == mysql_num_fields(prepare_meta_result));""")
-		func.add_block("""/* Execute the SELECT query */
-		if (mysql_stmt_execute(stmt)) {
-			fprintf(stderr, " mysql_stmt_execute(), failed\\n");
-			fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-			return NULL;
-		}""")
-		func.add_block(self.get_buffer_bindings())
-		func.add_block("""/* Bind the result buffers */
-		if (mysql_stmt_bind_result(stmt, param)) {
-			fprintf(stderr, " mysql_stmt_bind_result() failed\\n");
-			fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-			return NULL;
-		}""")
-		func.add_block("""/* Now buffer all results to client (optional step) */
-		if (mysql_stmt_store_result(stmt)) {
-			fprintf(stderr, " mysql_stmt_store_result() failed\\n");
-			fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-			return NULL;
-		}""")
-		func.add_block("""/* Fetch all rows */
-			struct sql_result_row* row = NULL;
-			struct sql_result_row* curr = NULL;
-		
-			res = calloc(1, sizeof(SQL_RESULT));
-			res->results = NULL;
-			res->type = {enum_name};
-			res->count = 0;""".format(enum_name=self.enum_name))
-		func.add_block(self.col_fetch())
-		func.add_block("""/* Free the prepared result metadata */
-			mysql_free_result(prepare_meta_result);
-			if (mysql_stmt_close(stmt)) {
-				fprintf(stderr, " failed while closing the statement\\n");
-				fprintf(stderr, " %s\\n", mysql_error(conn));
-				mysql_res_free(&res);
-				return NULL;
-			}""")
-		func.add_block("return res;")
-		return func
-
-	def declaration_find_by_id(self):
-		arg_list = [FunctionArgument("uint", "id")]
-		return FunctionTemplate("{}_find_by_id".format(self.name), "{}*".format(self.typedef_name), arg_list)
-
-	def template_find_by_id(self):
-		func = self.declaration_find_by_id()
-		func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(self.find_by_id_sql_string())))
-		func.add_macro_def(MacroDefinition("PARAM_COUNT", "1"))
-		func.add_block("{}* out;".format(self.typedef_name))
-		func.add_block("""
-			SQL_RESULT* res;
-			struct {name} {name};
-			{name}.id_{name} = id;
-			struct {name}* {name}T = &{name};
-			""".format(name=self.name))
-		func.add_block(self.get_col_param_buffer(["id_{}".format(self.name)]))
-		func.add_block("res = {}_execute_find(QUERY, param, PARAM_COUNT);".format(self.name))
-		func.add_block(self.col_param_buffer_free(1))
-		func.add_block("""out = res->results->data;
-			if (res->count == 1) {{
-				free(res->results);
-				free(res);
-				return out;
-			}} else {{
-				fprintf(stderr, "{name}_execute_find(), failed - multiple results (%d)\\n", res->count);
-				mysql_res_free(&res);
-				return NULL;
-			}}""".format(name=self.name))
-		return func
-
-	def declaration_insert(self):
-		arg_list = [FunctionArgument("{}*".format(self.typedef_name), "{}T".format(self.name))]
-		return FunctionTemplate("{}_insert".format(self.name), "uint", arg_list)
-
-	def template_insert(self):
-		func = self.declaration_insert()
-		func.add_macro_def(MacroDefinition("QUERY_LENGTH", "512"))
-		func.add_macro_def(MacroDefinition("STRING_SIZE", "255"))
-		func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(self.insert_sql_string())))
-		func.add_macro_def(MacroDefinition("PARAM_COUNT", "{}".format(self.param_count())))
-		func.add_block(self.get_insert_assertions())
-		func.add_block("""MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
-				MYSQL_STMT* __attribute__((cleanup(mysql_stmt_cleanup))) stmt;
-				uint retval;
-				""")
-		func.add_block("""conn = db_init();
-				stmt = mysql_stmt_init(conn);""")
-		func.add_block(self.col_param_lengths(func))
-		func.add_block(self.get_col_param_buffers())
-		func.add_block(self.get_update_fk())
-		func.add_block("""if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
-					fprintf(stderr, " mysql_stmt_prepare(), failed\\n");
-					fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-					return 0U;
-					}""")
-		func.add_block("""if (mysql_stmt_bind_param(stmt, param)) {
-					fprintf(stderr, " mysql_stmt_bind_param(), failed\\n");
-					fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-					return 0U;
-				}""")
-		func.add_block("""if (mysql_stmt_execute(stmt)) {
-					fprintf(stderr, " mysql_stmt_execute(), failed\\n");
-					fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
-					return 0U;
-				}""")
-		func.add_block("""retval = (uint) mysql_stmt_insert_id(stmt);
-				// update id after insertion;""")
-		func.add_block("{name}T->{pk} = retval;".format(name=self.name, pk="id_" + self.name))
-		func.add_block(self.col_param_buffer_free())
-		func.add_block("return retval;")
-		return func
-
-	def declaration_update(self):
-		arg_list = [FunctionArgument("{}*".format(self.typedef_name), "{}T".format(self.name))]
-		return FunctionTemplate("{}_update".format(self.name), "int", arg_list)
-
-	def template_update(self):
-		func = self.declaration_update()
-		func.add_block("assert({name}T->id_{name} != 0);".format(name=self.name))
-		func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(self.update_sql_string())))
-		func.add_macro_def(MacroDefinition("PARAM_COUNT", str(self.col_count())))
-		func.add_macro_def(MacroDefinition("STRING_SIZE", "255"))
-		func.add_block("""int retval;""")
-		func.add_block(self.col_update_params(func))
-		func.add_block("retval = {}_execute_update(QUERY, param, PARAM_COUNT);".format(self.name))
-		func.add_block(self.col_buffer_free())
-		func.add_block("return retval;")
-		return func
-
-	def declaration_delete(self):
-		arg_list = [FunctionArgument("{}*".format(self.typedef_name), "{}T".format(self.name))]
-		return FunctionTemplate("{}_delete".format(self.name), "int", arg_list)
-
-	def template_delete(self):
-		func = self.declaration_delete()
-		func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(self.delete_sql_string())))
-		func.add_macro_def(MacroDefinition("PARAM_COUNT", str(1)))
-		func.add_block("assert({name}T->id_{name} != 0);".format(name=self.name))
-		func.add_block("""int retval;""")
-		func.add_block(self.get_col_param_buffer(["id_{}".format(self.name)]))
-		func.add_block("retval = {}_execute_update(QUERY, param, PARAM_COUNT);".format(self.name))
-		func.add_block(self.col_param_buffer_free(1))
-
-		func.add_block("return retval;")
-		return func
-
-	def declaration_execute_update(self):
-		arg_list = [FunctionArgument("char const*", "query"),
-		            FunctionArgument("MYSQL_BIND*", "params"),
-		            FunctionArgument("uint", "param_count")]
-		return FunctionTemplate("{name}_execute_update".format(name=self.name), "int", arg_list)
-
-	def template_execute_update(self):
-		func = self.declaration_execute_update()
-		func.add_macro_def(MacroDefinition("QUERY_LENGTH", '512'))
-		func.add_block('\tMYSQL_STMT* stmt;\t\nMYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;\t\nint retval;')
-		func.add_block('\tconn = db_init();\t\nstmt = mysql_stmt_init(conn);')
-		func.add_block("""if ((retval = mysql_stmt_prepare(stmt, query, strnlen(query, QUERY_LENGTH)))) {
-					fprintf(stderr, "mysql_stmt_prepare(), failed\\n");
-					fprintf(stderr, "%s\\n", mysql_error(conn));
-					return retval;
-				}""")
-		func.add_block("""if ((retval = mysql_stmt_bind_param(stmt, params))) {
-					fprintf(stderr, "mysql_stmt_bind_param(), failed\\n");
-					fprintf(stderr, "%s\\n", mysql_error(conn));
-					return retval;
-				}""")
-		func.add_block("""if ((retval = mysql_stmt_execute(stmt))) {
-					fprintf(stderr, "mysql_stmt_execute(), failed\\n");
-					fprintf(stderr, "%s\\n", mysql_error(conn));
-					return retval;
-				}""")
-		func.add_block("""if ((retval = mysql_stmt_close(stmt))) {
-					fprintf(stderr, " failed while closing the statement\\n");
-					fprintf(stderr, " %s\\n", mysql_error(conn));
-					return retval;
-				}""")
-		return func
-
-
-region_props = [SqlColumn("id_region", SqlType.PK_LONG, 4),
-                SqlColumn("name", SqlType.VARCHAR, 255)]
-
-region = Struct("region", region_props)
-
-address_props = [SqlColumn("id_address", SqlType.PK_LONG, 4), SqlColumn("id_municipality", SqlType.FK_LONG, 4),
-                 SqlColumn("street", SqlType.VARCHAR, 255), SqlColumn("number", SqlType.VARCHAR, 8)]
-address = Struct("address", address_props)
-
-library_props = [SqlColumn("id_library", SqlType.PK_LONG, 4),
-                 SqlColumn("id_address", SqlType.FK_LONG, 4),
-                 SqlColumn("name", SqlType.VARCHAR, 255)]
-library = Struct("library", library_props)
-
-# print(library.__repr__())
-
-region.save_to_file()
-address.save_to_file()
-library.save_to_file()
-
-f1 = FunctionTemplate("region_execute_find", "SQL_RESULT*",
-                      [FunctionArgument("char const*", "query"),
-                       FunctionArgument("MYSQL_BIND*", "params"),
-                       FunctionArgument("uint", "param_count")])
-f1.add_macro_def(MacroDefinition("QUERY", '"select * from library;"'))
-# print(library.genereate_h())
-# print(library.template_execute_update())
+		for mem in self.members:
+			if mem.proptype == SqlType.PK_LONG:
+				return mem
+		return None

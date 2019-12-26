@@ -8,15 +8,17 @@
 
 
 /* Generated function */
-uint library_insert(LIBRARY* libraryT) {
+uint reader_insert(READER* readerT) {
 	#define QUERY_LENGTH 512
 	#define STRING_SIZE 255
-	#define QUERY "insert into library (id_address, name) values (?, ?);"
+	#define QUERY "insert into reader (username, password) values (?, ?);"
 	#define PARAM_COUNT 2
-	#define NAME_SIZE 255
+	#define USERNAME_SIZE 255
+	#define PASSWORD_SIZE 255
 	/* Generated using get_insert_assertions() */
-	assert(libraryT->id_library == 0);
-	assert(strnlen(libraryT->name, STRING_SIZE) > 1);
+	assert(readerT->id_user == 0);
+	assert(strnlen(readerT->username, STRING_SIZE) > 1);
+	assert(strnlen(readerT->password, STRING_SIZE) > 1);
 	
 
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -29,31 +31,30 @@ uint library_insert(LIBRARY* libraryT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (libraryT->address->id_address == 0) {
-		address_insert(libraryT->address);
-	} else {
-		address_update(libraryT->address);
-	}
 
 	/* Generated using col_param_lengths() */
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
 	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
+	unsigned long username_len;
+	username_len = strnlen(readerT->username, USERNAME_SIZE);
+	
+	unsigned long password_len;
+	password_len = strnlen(readerT->password, PASSWORD_SIZE);
 	
 
 	/* Generated using  get_col_param_buffers() */
 	
-	/* INTEGER PARAM */
-	param[0].buffer = malloc(sizeof(uint));
-	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
 	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
+	param[0].buffer = malloc(username_len);
+	param[0].buffer_type = MYSQL_TYPE_STRING;
+	param[0].buffer_length = username_len;
+	strncpy(param[0].buffer, readerT->username, username_len);
+	/* STRING PARAM */
+	param[1].buffer = malloc(password_len);
 	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	param[1].buffer_length = password_len;
+	strncpy(param[1].buffer, readerT->password, password_len);
 
 	if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
 		fprintf(stderr, " mysql_stmt_prepare(), failed\n");
@@ -76,7 +77,7 @@ uint library_insert(LIBRARY* libraryT) {
 	retval = (uint) mysql_stmt_insert_id(stmt);
 
 	// update id after insertion;
-	libraryT->id_library = retval;
+	readerT->id_user = retval;
 	
 
 	/* Generated using col_param_buffer_free() */
@@ -90,12 +91,13 @@ uint library_insert(LIBRARY* libraryT) {
 	#undef STRING_SIZE
 	#undef QUERY
 	#undef PARAM_COUNT
-	#undef NAME_SIZE
+	#undef USERNAME_SIZE
+	#undef PASSWORD_SIZE
 }
 
 
 /* Generated function */
-SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
+SQL_RESULT* reader_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_SIZE 512
 	#define RES_COL_COUNT 3
 	#define BUFFER_SIZE 255
@@ -108,9 +110,9 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	unsigned long lengths[RES_COL_COUNT];
 	my_bool is_null[RES_COL_COUNT];
 	my_bool error[RES_COL_COUNT];
-	uint id_library_buffer;
-	uint id_address_buffer;
-	char name_buffer[BUFFER_SIZE];
+	uint id_user_buffer;
+	char username_buffer[BUFFER_SIZE];
+	char password_buffer[BUFFER_SIZE];
 	
 
 	conn = db_init();
@@ -147,21 +149,22 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	/* INTEGER COLUMN */
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	param[0].buffer = &id_library_buffer;
+	param[0].buffer = &id_user_buffer;
 	param[0].is_null = &is_null[0];
 	param[0].length = &lengths[0];
 	param[0].error = &error[0];
 	
-	/* INTEGER COLUMN */
-	param[1].buffer_type = MYSQL_TYPE_LONG;
-	param[1].buffer = &id_address_buffer;
+	/* STRING COLUMN */
+	param[1].buffer_type = MYSQL_TYPE_STRING;
+	param[1].buffer = &username_buffer;
 	param[1].is_null = &is_null[1];
 	param[1].length = &lengths[1];
 	param[1].error = &error[1];
+	param[1].buffer_length = 255;
 	
 	/* STRING COLUMN */
 	param[2].buffer_type = MYSQL_TYPE_STRING;
-	param[2].buffer = &name_buffer;
+	param[2].buffer = &password_buffer;
 	param[2].is_null = &is_null[2];
 	param[2].length = &lengths[2];
 	param[2].error = &error[2];
@@ -188,7 +191,7 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	res = calloc(1, sizeof(SQL_RESULT));
 	res->results = NULL;
-	res->type = LIBRARY_E;
+	res->type = READER_E;
 	res->count = 0;
 
 	
@@ -205,22 +208,22 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 			}
 			curr->next = row;
 		}
-		row->data = calloc(1, sizeof(LIBRARY));
+		row->data = calloc(1, sizeof(READER));
 		
 		if (is_null[0]) {
-			((LIBRARY*) row->data)->id_library = 0;
+			((READER*) row->data)->id_user = 0;
 		} else {
-			((LIBRARY*) row->data)->id_library = id_library_buffer;
+			((READER*) row->data)->id_user = id_user_buffer;
 		}
 		if (is_null[1]) {
-			((LIBRARY*) row->data)->address = NULL;
+			strcpy(((READER*) row->data)->username, "NULL");
 		} else {
-			((LIBRARY*) row->data)->address = address_find_by_id(id_address_buffer);
+			strncpy(((READER*) row->data)->username, username_buffer, lengths[1]);
 		}
 		if (is_null[2]) {
-			strcpy(((LIBRARY*) row->data)->name, "NULL");
+			strcpy(((READER*) row->data)->password, "NULL");
 		} else {
-			strncpy(((LIBRARY*) row->data)->name, name_buffer, lengths[2]);
+			strncpy(((READER*) row->data)->password, password_buffer, lengths[2]);
 		}
 	}
 
@@ -242,28 +245,24 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 
 
 /* Generated function */
-LIBRARY* library_find_by_id(uint id) {
-	#define QUERY "select * from library where id_library = ?;"
+READER* reader_find_by_id(uint id) {
+	#define QUERY "select * from reader where id_reader = ?;"
 	#define PARAM_COUNT 1
-	LIBRARY* out;
+	READER* out;
 
 	
 	SQL_RESULT* res;
-	struct library library;
-	library.id_library = id;
-	struct library* libraryT = &library;
+	struct reader reader;
+	reader.id_user = id;
+	struct reader* readerT = &reader;
 	
 
 	/* Generated using  get_col_param_buffers() */
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(param, 0, sizeof(param));
 	
-	/* INTEGER PARAM */
-	param[0].buffer = malloc(sizeof(uint));
-	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
 
-	res = library_execute_find(QUERY, param, PARAM_COUNT);
+	res = reader_execute_find(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
@@ -275,7 +274,7 @@ LIBRARY* library_find_by_id(uint id) {
 		free(res);
 		return out;
 	} else {
-		fprintf(stderr, "library_execute_find(), failed - multiple results (%d)\n", res->count);
+		fprintf(stderr, "reader_execute_find(), failed - multiple results (%d)\n", res->count);
 		mysql_res_free(&res);
 		return NULL;
 	}
@@ -286,12 +285,13 @@ LIBRARY* library_find_by_id(uint id) {
 
 
 /* Generated function */
-int library_update(LIBRARY* libraryT) {
-	#define QUERY "update library set id_address = ?, name = ? where id_library = ?;"
+int reader_update(READER* readerT) {
+	#define QUERY "update reader set username = ?, password = ? where id_reader = ?;"
 	#define PARAM_COUNT 3
 	#define STRING_SIZE 255
-	#define NAME_SIZE 255
-	assert(libraryT->id_library != 0);
+	#define USERNAME_SIZE 255
+	#define PASSWORD_SIZE 255
+	assert(readerT->id_user != 0);
 
 	int retval;
 
@@ -299,24 +299,28 @@ int library_update(LIBRARY* libraryT) {
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
 	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
+	unsigned long username_len;
+	username_len = strnlen(readerT->username, USERNAME_SIZE);
 	
-	/* INTEGER PARAM */
-	param[0].buffer = malloc(sizeof(uint));
-	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
+	unsigned long password_len;
+	password_len = strnlen(readerT->password, PASSWORD_SIZE);
+	
 	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
+	param[0].buffer = malloc(username_len);
+	param[0].buffer_type = MYSQL_TYPE_STRING;
+	param[0].buffer_length = username_len;
+	strncpy(param[0].buffer, readerT->username, username_len);
+	/* STRING PARAM */
+	param[1].buffer = malloc(password_len);
 	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	param[1].buffer_length = password_len;
+	strncpy(param[1].buffer, readerT->password, password_len);
 	/* INTEGER PARAM */
 	param[2].buffer = malloc(sizeof(uint));
 	param[2].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[2].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[2].buffer, &readerT->id_user, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = reader_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_buffer_free() */
 	free(param[0].buffer);
@@ -329,12 +333,13 @@ int library_update(LIBRARY* libraryT) {
 	#undef QUERY
 	#undef PARAM_COUNT
 	#undef STRING_SIZE
-	#undef NAME_SIZE
+	#undef USERNAME_SIZE
+	#undef PASSWORD_SIZE
 }
 
 
 /* Generated function */
-int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
+int reader_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_LENGTH 512
 	MYSQL_STMT* stmt;
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -372,10 +377,10 @@ int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 
 
 /* Generated function */
-int library_delete(LIBRARY* libraryT) {
-	#define QUERY "delete from library where id_library = ?;"
+int reader_delete(READER* readerT) {
+	#define QUERY "delete from reader where id_reader = ?;"
 	#define PARAM_COUNT 1
-	assert(libraryT->id_library != 0);
+	assert(readerT->id_user != 0);
 
 	int retval;
 
@@ -383,12 +388,8 @@ int library_delete(LIBRARY* libraryT) {
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(param, 0, sizeof(param));
 	
-	/* INTEGER PARAM */
-	param[0].buffer = malloc(sizeof(uint));
-	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = reader_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);

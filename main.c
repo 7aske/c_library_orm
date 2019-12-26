@@ -4,21 +4,39 @@
 
 int main() {
 	REGION region1 = {0, "Ontario"};
-	MUNICIPALITY municipality1 = {0, "Waterloo", &region1};
-	ADDRESS address1 = {0, NULL, "Cambridge", "CB2 1TJ"};
-	LIBRARY library1 = {2, NULL, "Wren Library"};
+	MUNICIPALITY municipality1 = {0, &region1, "Waterloo",};
+	ADDRESS address1 = {0, &municipality1, "Cambridge", "CB2 1TJ"};
+	LIBRARY library1 = {0, &address1, "Wren Library"};
 	LIBRARY* library;
+	EMPLOYEE* employee;
 	ADDRESS* address;
 	REGION* region;
 	REGION* region2;
+	BOOK* book;
 	MUNICIPALITY* municipality;
 	MUNICIPALITY* municipality2;
-	library = library_find_by_id(1U);
-	printf("LIBRARY %d %d %s\n", library->id_library, library->address->id_address, library->name);
-	printf("ADDRESS %d %s %s\n", library->address->id_address, library->address->street, library->address->number);
-	printf("MUNICIPALITY %d %s (%d %s)\n", library->address->municipality->id_municipality, library->address->municipality->name,
-		   library->address->municipality->region->id_region, library->address->municipality->region->name);
-	printf("DELETE: %d \n", library_delete(&library1));
+	// library = library_find_by_id(1U);
+
+	PERSON p1 = {.id_person=0, .first_name="John", .last_name="Doe", .jmbg="1234567890123"};
+	// person_insert(&p1);
+	EMPLOYEE e1 = {
+			.person=&p1,
+			.library=&library1,
+			.position="Librarian"
+	};
+	employee = employee_find_by_id(1U);
+	// book = book_find_by_id(1U);
+	printf("EMPLOYEE %d %s %s %s", employee->id_employee, employee->person->first_name, employee->person->last_name,
+		   employee->position);
+	// printf("BOOK %d %s %s %s", book->id_book, book->name, book->isbn);
+	// employee_insert(&e1);
+
+	// printf("LIBRARY %d %d %s\n", library->id_library, library->address->id_address, library->name);
+	// printf("ADDRESS %d %s %s\n", library->address->id_address, library->address->street, library->address->number);
+	// printf("MUNICIPALITY %d %s (%d %s)\n", library->address->municipality->id_municipality,
+	// 	   library->address->municipality->name,
+	// 	   library->address->municipality->region->id_region, library->address->municipality->region->name);
+	// printf("DELETE: %d \n", library_delete(&library1));
 	// region = region_find_by_id(11U);
 	// region2 = region_find_by_id(102U);
 	// printf("REGION %d %s\n", region->id_region, region->name);

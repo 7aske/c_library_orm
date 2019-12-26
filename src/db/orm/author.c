@@ -8,15 +8,15 @@
 
 
 /* Generated function */
-uint library_insert(LIBRARY* libraryT) {
+uint author_insert(AUTHOR* authorT) {
 	#define QUERY_LENGTH 512
 	#define STRING_SIZE 255
-	#define QUERY "insert into library (id_address, name) values (?, ?);"
+	#define QUERY "insert into author (id_person, description) values (?, ?);"
 	#define PARAM_COUNT 2
-	#define NAME_SIZE 255
+	#define DESCRIPTION_SIZE 4096
 	/* Generated using get_insert_assertions() */
-	assert(libraryT->id_library == 0);
-	assert(strnlen(libraryT->name, STRING_SIZE) > 1);
+	assert(authorT->id_author == 0);
+	assert(strnlen(authorT->description, STRING_SIZE) > 1);
 	
 
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -29,18 +29,18 @@ uint library_insert(LIBRARY* libraryT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (libraryT->address->id_address == 0) {
-		address_insert(libraryT->address);
+	if (authorT->person->id_person == 0) {
+		person_insert(authorT->person);
 	} else {
-		address_update(libraryT->address);
+		person_update(authorT->person);
 	}
 
 	/* Generated using col_param_lengths() */
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
 	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
+	unsigned long description_len;
+	description_len = strnlen(authorT->description, DESCRIPTION_SIZE);
 	
 
 	/* Generated using  get_col_param_buffers() */
@@ -48,12 +48,12 @@ uint library_insert(LIBRARY* libraryT) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
+	memcpy(param[0].buffer, &authorT->person->id_person, sizeof(uint));
 	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
+	param[1].buffer = malloc(description_len);
 	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	param[1].buffer_length = description_len;
+	strncpy(param[1].buffer, authorT->description, description_len);
 
 	if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
 		fprintf(stderr, " mysql_stmt_prepare(), failed\n");
@@ -76,7 +76,7 @@ uint library_insert(LIBRARY* libraryT) {
 	retval = (uint) mysql_stmt_insert_id(stmt);
 
 	// update id after insertion;
-	libraryT->id_library = retval;
+	authorT->id_author = retval;
 	
 
 	/* Generated using col_param_buffer_free() */
@@ -90,12 +90,12 @@ uint library_insert(LIBRARY* libraryT) {
 	#undef STRING_SIZE
 	#undef QUERY
 	#undef PARAM_COUNT
-	#undef NAME_SIZE
+	#undef DESCRIPTION_SIZE
 }
 
 
 /* Generated function */
-SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
+SQL_RESULT* author_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_SIZE 512
 	#define RES_COL_COUNT 3
 	#define BUFFER_SIZE 255
@@ -108,9 +108,9 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	unsigned long lengths[RES_COL_COUNT];
 	my_bool is_null[RES_COL_COUNT];
 	my_bool error[RES_COL_COUNT];
-	uint id_library_buffer;
-	uint id_address_buffer;
-	char name_buffer[BUFFER_SIZE];
+	uint id_author_buffer;
+	uint id_person_buffer;
+	char description_buffer[BUFFER_SIZE];
 	
 
 	conn = db_init();
@@ -147,25 +147,25 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	/* INTEGER COLUMN */
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	param[0].buffer = &id_library_buffer;
+	param[0].buffer = &id_author_buffer;
 	param[0].is_null = &is_null[0];
 	param[0].length = &lengths[0];
 	param[0].error = &error[0];
 	
 	/* INTEGER COLUMN */
 	param[1].buffer_type = MYSQL_TYPE_LONG;
-	param[1].buffer = &id_address_buffer;
+	param[1].buffer = &id_person_buffer;
 	param[1].is_null = &is_null[1];
 	param[1].length = &lengths[1];
 	param[1].error = &error[1];
 	
 	/* STRING COLUMN */
 	param[2].buffer_type = MYSQL_TYPE_STRING;
-	param[2].buffer = &name_buffer;
+	param[2].buffer = &description_buffer;
 	param[2].is_null = &is_null[2];
 	param[2].length = &lengths[2];
 	param[2].error = &error[2];
-	param[2].buffer_length = 255;
+	param[2].buffer_length = 4096;
 	
 
 	/* Bind the result buffers */
@@ -188,7 +188,7 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	res = calloc(1, sizeof(SQL_RESULT));
 	res->results = NULL;
-	res->type = LIBRARY_E;
+	res->type = AUTHOR_E;
 	res->count = 0;
 
 	
@@ -205,22 +205,22 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 			}
 			curr->next = row;
 		}
-		row->data = calloc(1, sizeof(LIBRARY));
+		row->data = calloc(1, sizeof(AUTHOR));
 		
 		if (is_null[0]) {
-			((LIBRARY*) row->data)->id_library = 0;
+			((AUTHOR*) row->data)->id_author = 0;
 		} else {
-			((LIBRARY*) row->data)->id_library = id_library_buffer;
+			((AUTHOR*) row->data)->id_author = id_author_buffer;
 		}
 		if (is_null[1]) {
-			((LIBRARY*) row->data)->address = NULL;
+			((AUTHOR*) row->data)->person = NULL;
 		} else {
-			((LIBRARY*) row->data)->address = address_find_by_id(id_address_buffer);
+			((AUTHOR*) row->data)->person = person_find_by_id(id_person_buffer);
 		}
 		if (is_null[2]) {
-			strcpy(((LIBRARY*) row->data)->name, "NULL");
+			strcpy(((AUTHOR*) row->data)->description, "NULL");
 		} else {
-			strncpy(((LIBRARY*) row->data)->name, name_buffer, lengths[2]);
+			strncpy(((AUTHOR*) row->data)->description, description_buffer, lengths[2]);
 		}
 	}
 
@@ -242,16 +242,16 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 
 
 /* Generated function */
-LIBRARY* library_find_by_id(uint id) {
-	#define QUERY "select * from library where id_library = ?;"
+AUTHOR* author_find_by_id(uint id) {
+	#define QUERY "select * from author where id_author = ?;"
 	#define PARAM_COUNT 1
-	LIBRARY* out;
+	AUTHOR* out;
 
 	
 	SQL_RESULT* res;
-	struct library library;
-	library.id_library = id;
-	struct library* libraryT = &library;
+	struct author author;
+	author.id_author = id;
+	struct author* authorT = &author;
 	
 
 	/* Generated using  get_col_param_buffers() */
@@ -261,9 +261,9 @@ LIBRARY* library_find_by_id(uint id) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[0].buffer, &authorT->id_author, sizeof(uint));
 
-	res = library_execute_find(QUERY, param, PARAM_COUNT);
+	res = author_execute_find(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
@@ -275,7 +275,7 @@ LIBRARY* library_find_by_id(uint id) {
 		free(res);
 		return out;
 	} else {
-		fprintf(stderr, "library_execute_find(), failed - multiple results (%d)\n", res->count);
+		fprintf(stderr, "author_execute_find(), failed - multiple results (%d)\n", res->count);
 		mysql_res_free(&res);
 		return NULL;
 	}
@@ -286,12 +286,12 @@ LIBRARY* library_find_by_id(uint id) {
 
 
 /* Generated function */
-int library_update(LIBRARY* libraryT) {
-	#define QUERY "update library set id_address = ?, name = ? where id_library = ?;"
+int author_update(AUTHOR* authorT) {
+	#define QUERY "update author set id_person = ?, description = ? where id_author = ?;"
 	#define PARAM_COUNT 3
 	#define STRING_SIZE 255
-	#define NAME_SIZE 255
-	assert(libraryT->id_library != 0);
+	#define DESCRIPTION_SIZE 4096
+	assert(authorT->id_author != 0);
 
 	int retval;
 
@@ -299,24 +299,24 @@ int library_update(LIBRARY* libraryT) {
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
 	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
+	unsigned long description_len;
+	description_len = strnlen(authorT->description, DESCRIPTION_SIZE);
 	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
+	memcpy(param[0].buffer, &authorT->person->id_person, sizeof(uint));
 	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
+	param[1].buffer = malloc(description_len);
 	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	param[1].buffer_length = description_len;
+	strncpy(param[1].buffer, authorT->description, description_len);
 	/* INTEGER PARAM */
 	param[2].buffer = malloc(sizeof(uint));
 	param[2].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[2].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[2].buffer, &authorT->id_author, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = author_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_buffer_free() */
 	free(param[0].buffer);
@@ -329,12 +329,12 @@ int library_update(LIBRARY* libraryT) {
 	#undef QUERY
 	#undef PARAM_COUNT
 	#undef STRING_SIZE
-	#undef NAME_SIZE
+	#undef DESCRIPTION_SIZE
 }
 
 
 /* Generated function */
-int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
+int author_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_LENGTH 512
 	MYSQL_STMT* stmt;
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -372,10 +372,10 @@ int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 
 
 /* Generated function */
-int library_delete(LIBRARY* libraryT) {
-	#define QUERY "delete from library where id_library = ?;"
+int author_delete(AUTHOR* authorT) {
+	#define QUERY "delete from author where id_author = ?;"
 	#define PARAM_COUNT 1
-	assert(libraryT->id_library != 0);
+	assert(authorT->id_author != 0);
 
 	int retval;
 
@@ -386,9 +386,9 @@ int library_delete(LIBRARY* libraryT) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[0].buffer, &authorT->id_author, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = author_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);

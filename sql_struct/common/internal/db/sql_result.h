@@ -6,18 +6,10 @@
 #define IT350_PZ_APP_SQL_RESULT_H
 
 enum entity_type {
-	ADDRESS_E,
-	AUTHOR_E,
-	AUTHOR_BOOK_E,
-	BOOK_E,
-	BOOK_SPECIMEN_E,
-	EMPLOYEE_E,
-	LIBRARY_E,
-	MUNICIPALITY_E,
-	PERSON_E,
-	READER_E,
 	REGION_E,
-	RENT_E
+	MUNICIPALITY_E,
+	ADDRESS_E,
+	LIBRARY_E,
 };
 
 struct sql_result_row {

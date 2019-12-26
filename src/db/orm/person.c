@@ -8,15 +8,19 @@
 
 
 /* Generated function */
-uint library_insert(LIBRARY* libraryT) {
+uint person_insert(PERSON* personT) {
 	#define QUERY_LENGTH 512
 	#define STRING_SIZE 255
-	#define QUERY "insert into library (id_address, name) values (?, ?);"
-	#define PARAM_COUNT 2
-	#define NAME_SIZE 255
+	#define QUERY "insert into person (first_name, last_name, jmbg) values (?, ?, ?);"
+	#define PARAM_COUNT 3
+	#define FIRST_NAME_SIZE 255
+	#define LAST_NAME_SIZE 255
+	#define JMBG_SIZE 13
 	/* Generated using get_insert_assertions() */
-	assert(libraryT->id_library == 0);
-	assert(strnlen(libraryT->name, STRING_SIZE) > 1);
+	assert(personT->id_person == 0);
+	assert(strnlen(personT->first_name, STRING_SIZE) > 1);
+	assert(strnlen(personT->last_name, STRING_SIZE) > 1);
+	assert(strnlen(personT->jmbg, STRING_SIZE) > 1);
 	
 
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -29,31 +33,38 @@ uint library_insert(LIBRARY* libraryT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (libraryT->address->id_address == 0) {
-		address_insert(libraryT->address);
-	} else {
-		address_update(libraryT->address);
-	}
 
 	/* Generated using col_param_lengths() */
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
 	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
+	unsigned long first_name_len;
+	first_name_len = strnlen(personT->first_name, FIRST_NAME_SIZE);
+	
+	unsigned long last_name_len;
+	last_name_len = strnlen(personT->last_name, LAST_NAME_SIZE);
+	
+	unsigned long jmbg_len;
+	jmbg_len = strnlen(personT->jmbg, JMBG_SIZE);
 	
 
 	/* Generated using  get_col_param_buffers() */
 	
-	/* INTEGER PARAM */
-	param[0].buffer = malloc(sizeof(uint));
-	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
 	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
+	param[0].buffer = malloc(first_name_len);
+	param[0].buffer_type = MYSQL_TYPE_STRING;
+	param[0].buffer_length = first_name_len;
+	strncpy(param[0].buffer, personT->first_name, first_name_len);
+	/* STRING PARAM */
+	param[1].buffer = malloc(last_name_len);
 	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	param[1].buffer_length = last_name_len;
+	strncpy(param[1].buffer, personT->last_name, last_name_len);
+	/* STRING PARAM */
+	param[2].buffer = malloc(jmbg_len);
+	param[2].buffer_type = MYSQL_TYPE_STRING;
+	param[2].buffer_length = jmbg_len;
+	strncpy(param[2].buffer, personT->jmbg, jmbg_len);
 
 	if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
 		fprintf(stderr, " mysql_stmt_prepare(), failed\n");
@@ -76,12 +87,13 @@ uint library_insert(LIBRARY* libraryT) {
 	retval = (uint) mysql_stmt_insert_id(stmt);
 
 	// update id after insertion;
-	libraryT->id_library = retval;
+	personT->id_person = retval;
 	
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	free(param[1].buffer);
+	free(param[2].buffer);
 	
 
 	return retval;
@@ -90,14 +102,16 @@ uint library_insert(LIBRARY* libraryT) {
 	#undef STRING_SIZE
 	#undef QUERY
 	#undef PARAM_COUNT
-	#undef NAME_SIZE
+	#undef FIRST_NAME_SIZE
+	#undef LAST_NAME_SIZE
+	#undef JMBG_SIZE
 }
 
 
 /* Generated function */
-SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
+SQL_RESULT* person_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_SIZE 512
-	#define RES_COL_COUNT 3
+	#define RES_COL_COUNT 4
 	#define BUFFER_SIZE 255
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
 	SQL_RESULT* res;
@@ -108,9 +122,10 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	unsigned long lengths[RES_COL_COUNT];
 	my_bool is_null[RES_COL_COUNT];
 	my_bool error[RES_COL_COUNT];
-	uint id_library_buffer;
-	uint id_address_buffer;
-	char name_buffer[BUFFER_SIZE];
+	uint id_person_buffer;
+	char first_name_buffer[BUFFER_SIZE];
+	char last_name_buffer[BUFFER_SIZE];
+	char jmbg_buffer[BUFFER_SIZE];
 	
 
 	conn = db_init();
@@ -147,25 +162,34 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	/* INTEGER COLUMN */
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	param[0].buffer = &id_library_buffer;
+	param[0].buffer = &id_person_buffer;
 	param[0].is_null = &is_null[0];
 	param[0].length = &lengths[0];
 	param[0].error = &error[0];
 	
-	/* INTEGER COLUMN */
-	param[1].buffer_type = MYSQL_TYPE_LONG;
-	param[1].buffer = &id_address_buffer;
+	/* STRING COLUMN */
+	param[1].buffer_type = MYSQL_TYPE_STRING;
+	param[1].buffer = &first_name_buffer;
 	param[1].is_null = &is_null[1];
 	param[1].length = &lengths[1];
 	param[1].error = &error[1];
+	param[1].buffer_length = 255;
 	
 	/* STRING COLUMN */
 	param[2].buffer_type = MYSQL_TYPE_STRING;
-	param[2].buffer = &name_buffer;
+	param[2].buffer = &last_name_buffer;
 	param[2].is_null = &is_null[2];
 	param[2].length = &lengths[2];
 	param[2].error = &error[2];
 	param[2].buffer_length = 255;
+	
+	/* STRING COLUMN */
+	param[3].buffer_type = MYSQL_TYPE_STRING;
+	param[3].buffer = &jmbg_buffer;
+	param[3].is_null = &is_null[3];
+	param[3].length = &lengths[3];
+	param[3].error = &error[3];
+	param[3].buffer_length = 13;
 	
 
 	/* Bind the result buffers */
@@ -188,7 +212,7 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	res = calloc(1, sizeof(SQL_RESULT));
 	res->results = NULL;
-	res->type = LIBRARY_E;
+	res->type = PERSON_E;
 	res->count = 0;
 
 	
@@ -205,22 +229,27 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 			}
 			curr->next = row;
 		}
-		row->data = calloc(1, sizeof(LIBRARY));
+		row->data = calloc(1, sizeof(PERSON));
 		
 		if (is_null[0]) {
-			((LIBRARY*) row->data)->id_library = 0;
+			((PERSON*) row->data)->id_person = 0;
 		} else {
-			((LIBRARY*) row->data)->id_library = id_library_buffer;
+			((PERSON*) row->data)->id_person = id_person_buffer;
 		}
 		if (is_null[1]) {
-			((LIBRARY*) row->data)->address = NULL;
+			strcpy(((PERSON*) row->data)->first_name, "NULL");
 		} else {
-			((LIBRARY*) row->data)->address = address_find_by_id(id_address_buffer);
+			strncpy(((PERSON*) row->data)->first_name, first_name_buffer, lengths[1]);
 		}
 		if (is_null[2]) {
-			strcpy(((LIBRARY*) row->data)->name, "NULL");
+			strcpy(((PERSON*) row->data)->last_name, "NULL");
 		} else {
-			strncpy(((LIBRARY*) row->data)->name, name_buffer, lengths[2]);
+			strncpy(((PERSON*) row->data)->last_name, last_name_buffer, lengths[2]);
+		}
+		if (is_null[3]) {
+			strcpy(((PERSON*) row->data)->jmbg, "NULL");
+		} else {
+			strncpy(((PERSON*) row->data)->jmbg, jmbg_buffer, lengths[3]);
 		}
 	}
 
@@ -242,16 +271,16 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 
 
 /* Generated function */
-LIBRARY* library_find_by_id(uint id) {
-	#define QUERY "select * from library where id_library = ?;"
+PERSON* person_find_by_id(uint id) {
+	#define QUERY "select * from person where id_person = ?;"
 	#define PARAM_COUNT 1
-	LIBRARY* out;
+	PERSON* out;
 
 	
 	SQL_RESULT* res;
-	struct library library;
-	library.id_library = id;
-	struct library* libraryT = &library;
+	struct person person;
+	person.id_person = id;
+	struct person* personT = &person;
 	
 
 	/* Generated using  get_col_param_buffers() */
@@ -261,9 +290,9 @@ LIBRARY* library_find_by_id(uint id) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[0].buffer, &personT->id_person, sizeof(uint));
 
-	res = library_execute_find(QUERY, param, PARAM_COUNT);
+	res = person_execute_find(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
@@ -275,7 +304,7 @@ LIBRARY* library_find_by_id(uint id) {
 		free(res);
 		return out;
 	} else {
-		fprintf(stderr, "library_execute_find(), failed - multiple results (%d)\n", res->count);
+		fprintf(stderr, "person_execute_find(), failed - multiple results (%d)\n", res->count);
 		mysql_res_free(&res);
 		return NULL;
 	}
@@ -286,12 +315,14 @@ LIBRARY* library_find_by_id(uint id) {
 
 
 /* Generated function */
-int library_update(LIBRARY* libraryT) {
-	#define QUERY "update library set id_address = ?, name = ? where id_library = ?;"
-	#define PARAM_COUNT 3
+int person_update(PERSON* personT) {
+	#define QUERY "update person set first_name = ?, last_name = ?, jmbg = ? where id_person = ?;"
+	#define PARAM_COUNT 4
 	#define STRING_SIZE 255
-	#define NAME_SIZE 255
-	assert(libraryT->id_library != 0);
+	#define FIRST_NAME_SIZE 255
+	#define LAST_NAME_SIZE 255
+	#define JMBG_SIZE 13
+	assert(personT->id_person != 0);
 
 	int retval;
 
@@ -299,29 +330,42 @@ int library_update(LIBRARY* libraryT) {
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
 	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
+	unsigned long first_name_len;
+	first_name_len = strnlen(personT->first_name, FIRST_NAME_SIZE);
 	
-	/* INTEGER PARAM */
-	param[0].buffer = malloc(sizeof(uint));
-	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
+	unsigned long last_name_len;
+	last_name_len = strnlen(personT->last_name, LAST_NAME_SIZE);
+	
+	unsigned long jmbg_len;
+	jmbg_len = strnlen(personT->jmbg, JMBG_SIZE);
+	
 	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
+	param[0].buffer = malloc(first_name_len);
+	param[0].buffer_type = MYSQL_TYPE_STRING;
+	param[0].buffer_length = first_name_len;
+	strncpy(param[0].buffer, personT->first_name, first_name_len);
+	/* STRING PARAM */
+	param[1].buffer = malloc(last_name_len);
 	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	param[1].buffer_length = last_name_len;
+	strncpy(param[1].buffer, personT->last_name, last_name_len);
+	/* STRING PARAM */
+	param[2].buffer = malloc(jmbg_len);
+	param[2].buffer_type = MYSQL_TYPE_STRING;
+	param[2].buffer_length = jmbg_len;
+	strncpy(param[2].buffer, personT->jmbg, jmbg_len);
 	/* INTEGER PARAM */
-	param[2].buffer = malloc(sizeof(uint));
-	param[2].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[2].buffer, &libraryT->id_library, sizeof(uint));
+	param[3].buffer = malloc(sizeof(uint));
+	param[3].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[3].buffer, &personT->id_person, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = person_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_buffer_free() */
 	free(param[0].buffer);
 	free(param[1].buffer);
 	free(param[2].buffer);
+	free(param[3].buffer);
 	
 
 	return retval;
@@ -329,12 +373,14 @@ int library_update(LIBRARY* libraryT) {
 	#undef QUERY
 	#undef PARAM_COUNT
 	#undef STRING_SIZE
-	#undef NAME_SIZE
+	#undef FIRST_NAME_SIZE
+	#undef LAST_NAME_SIZE
+	#undef JMBG_SIZE
 }
 
 
 /* Generated function */
-int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
+int person_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_LENGTH 512
 	MYSQL_STMT* stmt;
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -372,10 +418,10 @@ int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 
 
 /* Generated function */
-int library_delete(LIBRARY* libraryT) {
-	#define QUERY "delete from library where id_library = ?;"
+int person_delete(PERSON* personT) {
+	#define QUERY "delete from person where id_person = ?;"
 	#define PARAM_COUNT 1
-	assert(libraryT->id_library != 0);
+	assert(personT->id_person != 0);
 
 	int retval;
 
@@ -386,9 +432,9 @@ int library_delete(LIBRARY* libraryT) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[0].buffer, &personT->id_person, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = person_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);

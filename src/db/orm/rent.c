@@ -8,15 +8,13 @@
 
 
 /* Generated function */
-uint library_insert(LIBRARY* libraryT) {
+uint rent_insert(RENT* rentT) {
 	#define QUERY_LENGTH 512
 	#define STRING_SIZE 255
-	#define QUERY "insert into library (id_address, name) values (?, ?);"
+	#define QUERY "insert into rent (id_user, id_book_specimen) values (?, ?);"
 	#define PARAM_COUNT 2
-	#define NAME_SIZE 255
 	/* Generated using get_insert_assertions() */
-	assert(libraryT->id_library == 0);
-	assert(strnlen(libraryT->name, STRING_SIZE) > 1);
+	assert(rentT->id_rent == 0);
 	
 
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -29,18 +27,20 @@ uint library_insert(LIBRARY* libraryT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (libraryT->address->id_address == 0) {
-		address_insert(libraryT->address);
+	if (rentT->reader->id_user == 0) {
+		reader_insert(rentT->reader);
 	} else {
-		address_update(libraryT->address);
+		reader_update(rentT->reader);
+	}
+	if (rentT->book_specimen->id_book_specimen == 0) {
+		book_specimen_insert(rentT->book_specimen);
+	} else {
+		book_specimen_update(rentT->book_specimen);
 	}
 
 	/* Generated using col_param_lengths() */
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
-	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
 	
 
 	/* Generated using  get_col_param_buffers() */
@@ -48,12 +48,11 @@ uint library_insert(LIBRARY* libraryT) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
-	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
-	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	memcpy(param[0].buffer, &rentT->reader->id_user, sizeof(uint));
+	/* INTEGER PARAM */
+	param[1].buffer = malloc(sizeof(uint));
+	param[1].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[1].buffer, &rentT->book_specimen->id_book_specimen, sizeof(uint));
 
 	if (mysql_stmt_prepare(stmt, QUERY, QUERY_LENGTH)) {
 		fprintf(stderr, " mysql_stmt_prepare(), failed\n");
@@ -76,7 +75,7 @@ uint library_insert(LIBRARY* libraryT) {
 	retval = (uint) mysql_stmt_insert_id(stmt);
 
 	// update id after insertion;
-	libraryT->id_library = retval;
+	rentT->id_rent = retval;
 	
 
 	/* Generated using col_param_buffer_free() */
@@ -90,12 +89,11 @@ uint library_insert(LIBRARY* libraryT) {
 	#undef STRING_SIZE
 	#undef QUERY
 	#undef PARAM_COUNT
-	#undef NAME_SIZE
 }
 
 
 /* Generated function */
-SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
+SQL_RESULT* rent_execute_find(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_SIZE 512
 	#define RES_COL_COUNT 3
 	#define BUFFER_SIZE 255
@@ -108,9 +106,9 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	unsigned long lengths[RES_COL_COUNT];
 	my_bool is_null[RES_COL_COUNT];
 	my_bool error[RES_COL_COUNT];
-	uint id_library_buffer;
-	uint id_address_buffer;
-	char name_buffer[BUFFER_SIZE];
+	uint id_rent_buffer;
+	uint id_user_buffer;
+	uint id_book_specimen_buffer;
 	
 
 	conn = db_init();
@@ -147,25 +145,24 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	/* INTEGER COLUMN */
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	param[0].buffer = &id_library_buffer;
+	param[0].buffer = &id_rent_buffer;
 	param[0].is_null = &is_null[0];
 	param[0].length = &lengths[0];
 	param[0].error = &error[0];
 	
 	/* INTEGER COLUMN */
 	param[1].buffer_type = MYSQL_TYPE_LONG;
-	param[1].buffer = &id_address_buffer;
+	param[1].buffer = &id_user_buffer;
 	param[1].is_null = &is_null[1];
 	param[1].length = &lengths[1];
 	param[1].error = &error[1];
 	
-	/* STRING COLUMN */
-	param[2].buffer_type = MYSQL_TYPE_STRING;
-	param[2].buffer = &name_buffer;
+	/* INTEGER COLUMN */
+	param[2].buffer_type = MYSQL_TYPE_LONG;
+	param[2].buffer = &id_book_specimen_buffer;
 	param[2].is_null = &is_null[2];
 	param[2].length = &lengths[2];
 	param[2].error = &error[2];
-	param[2].buffer_length = 255;
 	
 
 	/* Bind the result buffers */
@@ -188,7 +185,7 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 	
 	res = calloc(1, sizeof(SQL_RESULT));
 	res->results = NULL;
-	res->type = LIBRARY_E;
+	res->type = RENT_E;
 	res->count = 0;
 
 	
@@ -205,22 +202,22 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 			}
 			curr->next = row;
 		}
-		row->data = calloc(1, sizeof(LIBRARY));
+		row->data = calloc(1, sizeof(RENT));
 		
 		if (is_null[0]) {
-			((LIBRARY*) row->data)->id_library = 0;
+			((RENT*) row->data)->id_rent = 0;
 		} else {
-			((LIBRARY*) row->data)->id_library = id_library_buffer;
+			((RENT*) row->data)->id_rent = id_rent_buffer;
 		}
 		if (is_null[1]) {
-			((LIBRARY*) row->data)->address = NULL;
+			((RENT*) row->data)->reader = NULL;
 		} else {
-			((LIBRARY*) row->data)->address = address_find_by_id(id_address_buffer);
+			((RENT*) row->data)->reader = reader_find_by_id(id_user_buffer);
 		}
 		if (is_null[2]) {
-			strcpy(((LIBRARY*) row->data)->name, "NULL");
+			((RENT*) row->data)->book_specimen = NULL;
 		} else {
-			strncpy(((LIBRARY*) row->data)->name, name_buffer, lengths[2]);
+			((RENT*) row->data)->book_specimen = book_specimen_find_by_id(id_book_specimen_buffer);
 		}
 	}
 
@@ -242,16 +239,16 @@ SQL_RESULT* library_execute_find(char const* query, MYSQL_BIND* params, uint par
 
 
 /* Generated function */
-LIBRARY* library_find_by_id(uint id) {
-	#define QUERY "select * from library where id_library = ?;"
+RENT* rent_find_by_id(uint id) {
+	#define QUERY "select * from rent where id_rent = ?;"
 	#define PARAM_COUNT 1
-	LIBRARY* out;
+	RENT* out;
 
 	
 	SQL_RESULT* res;
-	struct library library;
-	library.id_library = id;
-	struct library* libraryT = &library;
+	struct rent rent;
+	rent.id_rent = id;
+	struct rent* rentT = &rent;
 	
 
 	/* Generated using  get_col_param_buffers() */
@@ -261,9 +258,9 @@ LIBRARY* library_find_by_id(uint id) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[0].buffer, &rentT->id_rent, sizeof(uint));
 
-	res = library_execute_find(QUERY, param, PARAM_COUNT);
+	res = rent_execute_find(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
@@ -275,7 +272,7 @@ LIBRARY* library_find_by_id(uint id) {
 		free(res);
 		return out;
 	} else {
-		fprintf(stderr, "library_execute_find(), failed - multiple results (%d)\n", res->count);
+		fprintf(stderr, "rent_execute_find(), failed - multiple results (%d)\n", res->count);
 		mysql_res_free(&res);
 		return NULL;
 	}
@@ -286,12 +283,11 @@ LIBRARY* library_find_by_id(uint id) {
 
 
 /* Generated function */
-int library_update(LIBRARY* libraryT) {
-	#define QUERY "update library set id_address = ?, name = ? where id_library = ?;"
+int rent_update(RENT* rentT) {
+	#define QUERY "update rent set id_user = ?, id_book_specimen = ? where id_rent = ?;"
 	#define PARAM_COUNT 3
 	#define STRING_SIZE 255
-	#define NAME_SIZE 255
-	assert(libraryT->id_library != 0);
+	assert(rentT->id_rent != 0);
 
 	int retval;
 
@@ -299,24 +295,20 @@ int library_update(LIBRARY* libraryT) {
 	MYSQL_BIND param[PARAM_COUNT];
 	memset(&param, 0, sizeof(param));
 	
-	unsigned long name_len;
-	name_len = strnlen(libraryT->name, NAME_SIZE);
-	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->address->id_address, sizeof(uint));
-	/* STRING PARAM */
-	param[1].buffer = malloc(name_len);
-	param[1].buffer_type = MYSQL_TYPE_STRING;
-	param[1].buffer_length = name_len;
-	strncpy(param[1].buffer, libraryT->name, name_len);
+	memcpy(param[0].buffer, &rentT->reader->id_user, sizeof(uint));
+	/* INTEGER PARAM */
+	param[1].buffer = malloc(sizeof(uint));
+	param[1].buffer_type = MYSQL_TYPE_LONG;
+	memcpy(param[1].buffer, &rentT->book_specimen->id_book_specimen, sizeof(uint));
 	/* INTEGER PARAM */
 	param[2].buffer = malloc(sizeof(uint));
 	param[2].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[2].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[2].buffer, &rentT->id_rent, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = rent_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_buffer_free() */
 	free(param[0].buffer);
@@ -329,12 +321,11 @@ int library_update(LIBRARY* libraryT) {
 	#undef QUERY
 	#undef PARAM_COUNT
 	#undef STRING_SIZE
-	#undef NAME_SIZE
 }
 
 
 /* Generated function */
-int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
+int rent_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 	#define QUERY_LENGTH 512
 	MYSQL_STMT* stmt;
 	MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
@@ -372,10 +363,10 @@ int library_execute(char const* query, MYSQL_BIND* params, uint param_count) {
 
 
 /* Generated function */
-int library_delete(LIBRARY* libraryT) {
-	#define QUERY "delete from library where id_library = ?;"
+int rent_delete(RENT* rentT) {
+	#define QUERY "delete from rent where id_rent = ?;"
 	#define PARAM_COUNT 1
-	assert(libraryT->id_library != 0);
+	assert(rentT->id_rent != 0);
 
 	int retval;
 
@@ -386,9 +377,9 @@ int library_delete(LIBRARY* libraryT) {
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
 	param[0].buffer_type = MYSQL_TYPE_LONG;
-	memcpy(param[0].buffer, &libraryT->id_library, sizeof(uint));
+	memcpy(param[0].buffer, &rentT->id_rent, sizeof(uint));
 
-	retval = library_execute(QUERY, param, PARAM_COUNT);
+	retval = rent_execute(QUERY, param, PARAM_COUNT);
 
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
