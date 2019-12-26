@@ -19,7 +19,11 @@ int main() {
 	MUNICIPALITY* municipality2;
 	// library = library_find_by_id(1U);
 
-	PERSON p1 = {.id_person=0, .first_name="John", .last_name="Doe", .jmbg="1234567890123"};
+	PERSON p1 = {.id_person=0,
+			.first_name="John",
+			.last_name="Doe",
+			.jmbg="1234567890123"
+	};
 	// person_insert(&p1);
 	EMPLOYEE e1 = {
 			.person=&p1,

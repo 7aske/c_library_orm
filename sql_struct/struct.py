@@ -54,7 +54,7 @@ class Struct:
 		my_bool error[RES_COL_COUNT];\n"""
 		for prop in self.members:
 			out += "\t"
-			if prop.proptype in [SqlType.VARCHAR, SqlType.DATE]:
+			if prop.proptype in [SqlType.VARCHAR, SqlType.DATE, SqlType.TEXT]:
 				out += "char {col}_buffer[BUFFER_SIZE];\n".format(col=prop.name)
 			elif prop.proptype in [SqlType.LONG, SqlType.FK_LONG, SqlType.PK_LONG]:
 				out += "uint {col}_buffer;\n".format(col=prop.name)
@@ -88,7 +88,7 @@ class Struct:
 				"""
 		reg_type = None
 		mysql_type = None
-		if prop.proptype == SqlType.VARCHAR:
+		if prop.proptype in [SqlType.VARCHAR, SqlType.TEXT]:
 			reg_type = "STRING"
 			mysql_type = "MYSQL_TYPE_STRING"
 			out += "param[{index}].buffer_length = {len};\n".format(index=index, len=prop.size)
@@ -101,6 +101,9 @@ class Struct:
 		elif prop.proptype in [SqlType.LONG, SqlType.FK_LONG, SqlType.PK_LONG]:
 			reg_type = "INTEGER"
 			mysql_type = "MYSQL_TYPE_LONG"
+		else:
+			msg = f"SQL type not handled '{prop}'"
+			assert False, msg
 
 		assert reg_type is not None
 		assert mysql_type is not None
@@ -115,7 +118,7 @@ class Struct:
 		cols = ""
 
 		for i, prop in enumerate(self.members):
-			if prop.proptype == SqlType.VARCHAR:
+			if prop.proptype in [SqlType.VARCHAR, SqlType.TEXT]:
 				cols += """
 					if (is_null[{index}]) {{
 						strcpy((({name}*) row->data)->{col}, "NULL");
@@ -142,8 +145,10 @@ class Struct:
 						(({name}*) row->data)->{col_name} = NULL;
 					}} else {{
 						(({name}*) row->data)->{col_name} = {col_name}_find_by_id({col}_buffer);
-					}}""".format(index=i, col=prop.name, col_name=prop.name[3:], name=self.typedef_name)
-
+					}}""".format(index=i, col=prop.name, col_name=prop.name.replace("_id", "").replace("id_", ""), name=self.typedef_name)
+			else:
+				msg = f"SQL type not handled '{prop}'"
+				assert False, msg
 		return """
 			/* Generated using col_fetch()*/
 			while (!mysql_stmt_fetch(stmt)) {{
@@ -214,7 +219,7 @@ class Struct:
 		mysql_type = None
 		buffer_size = None
 
-		if prop.proptype == SqlType.VARCHAR:
+		if prop.proptype in [SqlType.VARCHAR, SqlType.TEXT]:
 			reg_type = "STRING"
 			mysql_type = "MYSQL_TYPE_STRING"
 			buffer_size = "{col}_len".format(col=prop.name)
@@ -238,13 +243,16 @@ class Struct:
 			mysql_type = "MYSQL_TYPE_DATE"
 			buffer_size = "{}".format(prop.size)
 			out += "mysql_timecpy(param[{index}].buffer, &{name}T->{col});"
+		else:
+			msg = f"SQL type not handled '{prop}'"
+			assert False, msg
 
 		assert reg_type is not None
 		assert mysql_type is not None
 		assert buffer_size is not None
 
 		return out.format(index=num, type=reg_type, mysql_type=mysql_type, col=prop.name, name=name,
-		                  buffer_size=buffer_size, col_fk=prop.name[3:])
+		                  buffer_size=buffer_size, col_fk=prop.name.replace("_id", "").replace("id_", ""))
 
 	def col_param_buffer_free(self, num: int = None):
 		"""
@@ -284,7 +292,7 @@ class Struct:
 					{fk_name}_insert({name}T->{fk_name});
 				}} else {{
 					{fk_name}_update({name}T->{fk_name});
-				}}""".format(name=self.name, fk_name=prop.name[3:], fk_id=prop.name)
+				}}""".format(name=self.name, fk_name=prop.name.replace("_id", "").replace("id_", ""), fk_id=prop.name)
 		return out
 
 	def col_param_lengths(self, func_ref: FunctionTemplate):
@@ -295,7 +303,7 @@ class Struct:
 		out += "MYSQL_BIND param[PARAM_COUNT];\n"
 		out += "memset(&param, 0, sizeof(param));\n"
 		for prop in self.members:
-			if prop.proptype == SqlType.VARCHAR:
+			if prop.proptype in [ SqlType.VARCHAR, SqlType.TEXT]:
 				out += self.col_param_length(prop, func_ref)
 		return out
 
@@ -321,7 +329,7 @@ class Struct:
 		memb = self.members.copy()
 		memb.append(memb.pop(0))
 		for prop in memb:
-			if prop.proptype == SqlType.VARCHAR:
+			if prop.proptype in [SqlType.VARCHAR, SqlType.TEXT]:
 				out += self.col_param_length(prop, func_ref)
 
 		for i, prop in enumerate(memb):
