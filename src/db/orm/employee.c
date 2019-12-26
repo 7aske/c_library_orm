@@ -52,7 +52,7 @@ uint employee_insert(EMPLOYEE* employeeT) {
 	position_len = strnlen(employeeT->position, POSITION_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
@@ -429,6 +429,23 @@ int employee_delete(EMPLOYEE* employeeT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* employee_find_all() {
+	#define QUERY "select * from employee;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = employee_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

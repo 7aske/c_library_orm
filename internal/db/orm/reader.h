@@ -29,4 +29,6 @@ int reader_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int reader_delete(READER* readerT);
 
+SQL_RESULT* reader_find_all();
+
 #endif

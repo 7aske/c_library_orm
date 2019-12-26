@@ -41,7 +41,7 @@ uint reader_insert(READER* readerT) {
 	password_len = strnlen(readerT->password, PASSWORD_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* STRING PARAM */
 	param[0].buffer = malloc(username_len);
@@ -404,6 +404,23 @@ int reader_delete(READER* readerT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* reader_find_all() {
+	#define QUERY "select * from reader;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = reader_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

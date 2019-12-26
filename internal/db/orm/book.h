@@ -30,4 +30,6 @@ int book_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int book_delete(BOOK* bookT);
 
+SQL_RESULT* book_find_all();
+
 #endif

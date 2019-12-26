@@ -44,7 +44,7 @@ uint municipality_insert(MUNICIPALITY* municipalityT) {
 	name_len = strnlen(municipalityT->name, NAME_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
@@ -398,6 +398,23 @@ int municipality_delete(MUNICIPALITY* municipalityT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* municipality_find_all() {
+	#define QUERY "select * from municipality;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = municipality_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

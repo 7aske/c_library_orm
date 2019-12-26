@@ -44,7 +44,7 @@ uint library_insert(LIBRARY* libraryT) {
 	name_len = strnlen(libraryT->name, NAME_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
@@ -398,6 +398,23 @@ int library_delete(LIBRARY* libraryT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* library_find_all() {
+	#define QUERY "select * from library;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = library_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

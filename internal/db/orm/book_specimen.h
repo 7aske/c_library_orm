@@ -30,4 +30,6 @@ int book_specimen_execute(char const* query, MYSQL_BIND* params, uint param_coun
 
 int book_specimen_delete(BOOK_SPECIMEN* book_specimenT);
 
+SQL_RESULT* book_specimen_find_all();
+
 #endif

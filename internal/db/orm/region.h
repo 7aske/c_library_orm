@@ -28,4 +28,6 @@ int region_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int region_delete(REGION* regionT);
 
+SQL_RESULT* region_find_all();
+
 #endif

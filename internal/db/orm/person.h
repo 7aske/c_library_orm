@@ -30,4 +30,6 @@ int person_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int person_delete(PERSON* personT);
 
+SQL_RESULT* person_find_all();
+
 #endif

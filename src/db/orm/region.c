@@ -36,7 +36,7 @@ uint region_insert(REGION* regionT) {
 	name_len = strnlen(regionT->name, NAME_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* STRING PARAM */
 	param[0].buffer = malloc(name_len);
@@ -367,6 +367,23 @@ int region_delete(REGION* regionT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* region_find_all() {
+	#define QUERY "select * from region;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = region_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

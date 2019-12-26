@@ -202,7 +202,7 @@ class Struct:
 		"""
 		Generates buffers for all available struct members.
 		"""
-		out = "/* Generated using  get_col_param_buffers() */\n"
+		out = "/* Generated using get_col_param_buffers() */\n"
 		for i, prop in enumerate(self.members):
 			if i == 0:
 				continue

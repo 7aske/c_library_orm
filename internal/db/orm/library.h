@@ -29,4 +29,6 @@ int library_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int library_delete(LIBRARY* libraryT);
 
+SQL_RESULT* library_find_all();
+
 #endif

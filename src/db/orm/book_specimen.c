@@ -52,7 +52,7 @@ uint book_specimen_insert(BOOK_SPECIMEN* book_specimenT) {
 	book_serial_len = strnlen(book_specimenT->book_serial, BOOK_SERIAL_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
@@ -429,6 +429,23 @@ int book_specimen_delete(BOOK_SPECIMEN* book_specimenT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* book_specimen_find_all() {
+	#define QUERY "select * from book_specimen;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = book_specimen_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

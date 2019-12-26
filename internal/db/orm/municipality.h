@@ -29,4 +29,6 @@ int municipality_execute(char const* query, MYSQL_BIND* params, uint param_count
 
 int municipality_delete(MUNICIPALITY* municipalityT);
 
+SQL_RESULT* municipality_find_all();
+
 #endif

@@ -29,4 +29,6 @@ int author_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int author_delete(AUTHOR* authorT);
 
+SQL_RESULT* author_find_all();
+
 #endif

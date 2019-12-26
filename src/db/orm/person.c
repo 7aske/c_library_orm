@@ -46,7 +46,7 @@ uint person_insert(PERSON* personT) {
 	jmbg_len = strnlen(personT->jmbg, JMBG_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* STRING PARAM */
 	param[0].buffer = malloc(first_name_len);
@@ -441,6 +441,23 @@ int person_delete(PERSON* personT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* person_find_all() {
+	#define QUERY "select * from person;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = person_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

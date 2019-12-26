@@ -41,7 +41,7 @@ uint book_insert(BOOK* bookT) {
 	name_len = strnlen(bookT->name, NAME_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* STRING PARAM */
 	param[0].buffer = malloc(isbn_len);
@@ -428,6 +428,23 @@ int book_delete(BOOK* bookT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* book_find_all() {
+	#define QUERY "select * from book;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = book_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

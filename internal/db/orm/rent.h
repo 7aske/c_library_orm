@@ -30,4 +30,6 @@ int rent_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int rent_delete(RENT* rentT);
 
+SQL_RESULT* rent_find_all();
+
 #endif

@@ -49,7 +49,7 @@ uint address_insert(ADDRESS* addressT) {
 	number_len = strnlen(addressT->number, NUMBER_SIZE);
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
@@ -435,6 +435,23 @@ int address_delete(ADDRESS* addressT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* address_find_all() {
+	#define QUERY "select * from address;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = address_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

@@ -47,7 +47,7 @@ uint author_book_insert(AUTHOR_BOOK* author_bookT) {
 	memset(&param, 0, sizeof(param));
 	
 
-	/* Generated using  get_col_param_buffers() */
+	/* Generated using get_col_param_buffers() */
 	
 	/* INTEGER PARAM */
 	param[0].buffer = malloc(sizeof(uint));
@@ -392,6 +392,23 @@ int author_book_delete(AUTHOR_BOOK* author_bookT) {
 	
 
 	return retval;
+
+	#undef QUERY
+	#undef PARAM_COUNT
+}
+
+
+/* Generated function */
+SQL_RESULT* author_book_find_all() {
+	#define QUERY "select * from author_book;"
+	#define PARAM_COUNT 0
+	SQL_RESULT* res;
+
+	MYSQL_BIND param[1];
+
+	res = author_book_execute_find(QUERY, param, PARAM_COUNT);
+
+	return res;
 
 	#undef QUERY
 	#undef PARAM_COUNT

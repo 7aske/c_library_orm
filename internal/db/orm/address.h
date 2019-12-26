@@ -30,4 +30,6 @@ int address_execute(char const* query, MYSQL_BIND* params, uint param_count);
 
 int address_delete(ADDRESS* addressT);
 
+SQL_RESULT* address_find_all();
+
 #endif
