@@ -1,27 +1,21 @@
-//
-// Created by nik on 12/20/19.
-//
-
-#ifndef IT350_PZ_APP_DBC_H
-#define IT350_PZ_APP_DBC_H
-
-#define SQL_ADDR "127.0.0.1"
-// #define SQL_ADDR "192.168.1.202"
-#define SQL_USER "nik"
-#define SQL_PASS "nik"
-#define SQL_DB   "library"
-#define SQL_PORT 3306
+#ifndef APP_DBC_H
+#define APP_DBC_H
 
 #pragma once
 
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
 
 #include <mysql/mysql.h>
 
-#include "db/orm/entity.h"
+#include "sql_cred.h"
+
+#include "db/util.h"
 #include "db/sql_result.h"
+#include "db/orm/entity.h"
 
 extern MYSQL*
 db_init();

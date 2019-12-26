@@ -1,6 +1,9 @@
 import pprint
+from shutil import copy2
 from subprocess import Popen
 from os.path import exists
+from typing import List
+
 from function import FunctionTemplate, FunctionArgument, MacroDefinition
 from header import Header
 from struct import Struct
@@ -12,7 +15,8 @@ import json
 
 def main():
 	out_dir = "out"
-	inp_file = "studentska.sql"
+	inp_file = "aircompany.sql"
+
 	assert exists(inp_file)
 
 	name = os.path.splitext(inp_file)[0]
@@ -41,11 +45,17 @@ def main():
 			elif "width" in column["type"].keys():
 				col_size = column["type"]["width"]
 			else:
-				col_size = 56
-
+				if "fractional" in column["type"].keys() and col_type in ["date", "time"]:
+					col_size = 56
+				else:
+					msg = f"SQL type size not handled '{col_name}' in struct '{struct_name}'"
+					assert False, msg
+			print(struct_name)
 			if {"column": col_name} in table["primaryKey"]["columns"]:
 				col_type_sql = SqlType.PK_LONG
 			elif col_type == "varchar":
+				col_type_sql = SqlType.VARCHAR
+			elif col_type == "char":
 				col_type_sql = SqlType.VARCHAR
 			elif col_type == "text":
 				col_type_sql = SqlType.TEXT
@@ -54,7 +64,7 @@ def main():
 			elif col_type == "date":
 				col_type_sql = SqlType.DATE
 			else:
-				msg = f"SQL type not handled '{col_type_sql}' in struct '{struct_name}'"
+				msg = f"SQL type not handled '{col_type}' in struct '{struct_name}'"
 				assert False, msg
 
 			if "foreignKeys" in table.keys():
@@ -73,12 +83,64 @@ def main():
 
 	for struct in structs:
 		save_to_file(struct, out_dir)
-		print(struct.name.upper() + "_E")
+	# print(struct.name.upper() + "_E")
+
+	with open(out_dir + "/internal/db/orm/entity.h", "w") as file:
+		file.write(generate_entity_h(structs))
+
+	with open(out_dir + "/internal/db/util.h", "w") as file:
+		file.write(generate_sql_result_h(structs))
+	for root, dirs, files in os.walk('common', topdown=True):
+		path = root.split(os.sep)
+		for file in files:
+			pth = "/".join(path[1:]) + "/" + file
+			copy2("common" + "/" + "/".join(path[1:]) + "/" + file, out_dir + "/" + "/".join(path[1:]) + "/" + file)
 
 
-# save_to_file(region)
-# save_to_file(library)
-# save_to_file(address)
+def generate_sql_result_h(structs: List[Struct]):
+	out = """
+#ifndef {uname}_APP_SQL_RESULT_H
+#define {uname}_APP_SQL_RESULT_H
+
+typedef unsigned int uint;
+
+enum entity_type {{
+{entities}}};
+
+struct sql_result_row {{
+	void* data;
+	struct sql_result_row* next;
+}};
+
+struct sql_result {{
+	struct sql_result_row* results;
+	uint count;
+	enum entity_type type;
+}};
+
+typedef enum entity_type ENTITY_TYPE;
+typedef struct sql_result SQL_RESULT;
+typedef struct sql_result_row SQL_RESULT_ROW;
+
+#endif //{uname}_APP_SQL_RESULT_H
+""".format(uname=os.getlogin(), entities="".join(["\t" + struct.name.upper() + "_E,\n" for struct in structs]))
+	return out
+
+
+def generate_entity_h(structs: List[Struct]):
+	entity_h = Header()
+	entity_h.set_header_guard("__{name}_DB_ENTITY_H".format(name=os.getlogin()))
+	entity_h.add_pragma("once")
+	entity_h.add_global_include("string.h")
+	entity_h.add_global_include("stdlib.h")
+	entity_h.add_global_include("mysql/mysql.h")
+
+	entity_h.add_local_include("db/dbc.h")
+
+	for struct in structs:
+		entity_h.add_local_include(f"db/orm/{struct.name}.h")
+
+	return str(entity_h)
 
 
 def save_to_file(struct: Struct, out_dir: str = "out"):
@@ -120,7 +182,9 @@ def save_to_file(struct: Struct, out_dir: str = "out"):
 		os.mkdir(out_dir + "/src/db/orm")
 	with open(out_dir + "/src/db/orm/{name}.c".format(name=struct.name), "w") as file:
 		file.write(file_header)
-		file.write("\n#include \"db/orm/entity.h\"\n\n\n")
+
+		file.write(f"\n#include \"db/orm/{struct.name}.h\"\n")
+
 		file.write(str(insert_func))
 		file.write(str(execute_find_func))
 		file.write(str(find_by_id_func))
@@ -135,11 +199,16 @@ def save_to_file(struct: Struct, out_dir: str = "out"):
 		os.mkdir(out_dir + "/internal/db/orm")
 	with open(out_dir + "/internal/db/orm/{name}.h".format(name=struct.name), "w") as file:
 		file.write(file_header)
-		file.write(genereate_h(struct))
+		file.write(generate_h(struct))
 
 
-def genereate_h(struct: Struct):
-	return str(Header(struct))
+def generate_h(struct: Struct):
+	header = Header()
+	header.set_header_guard("__{uname}_DB_ENTITY_STRUCT_{name}_H".format(name=struct.name.upper(), uname=os.getlogin()))
+	header.add_pragma("once")
+	header.add_local_include("db/orm/entity.h")
+	header.add_struct(struct)
+	return str(header)
 
 
 def insert_sql_string(struct: Struct):

@@ -1,9 +1,8 @@
-//
-// Created by nik on 12/21/19.
-//
 
-#ifndef IT350_PZ_APP_SQL_RESULT_H
-#define IT350_PZ_APP_SQL_RESULT_H
+#ifndef nik_APP_SQL_RESULT_H
+#define nik_APP_SQL_RESULT_H
+
+typedef unsigned int uint;
 
 enum entity_type {
 	ADDRESS_E,
@@ -17,7 +16,7 @@ enum entity_type {
 	PERSON_E,
 	READER_E,
 	REGION_E,
-	RENT_E
+	RENT_E,
 };
 
 struct sql_result_row {
@@ -35,4 +34,4 @@ typedef enum entity_type ENTITY_TYPE;
 typedef struct sql_result SQL_RESULT;
 typedef struct sql_result_row SQL_RESULT_ROW;
 
-#endif //IT350_PZ_APP_SQL_RESULT_H
+#endif //nik_APP_SQL_RESULT_H

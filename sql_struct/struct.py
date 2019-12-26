@@ -26,11 +26,41 @@ class Struct:
 	def __setitem__(self, key, value):
 		self.members[key] = value
 
+	def __str__(self):
+		out = ""
+		out += "struct {name} {{\n".format(name=self.name)
+		out += "".join(["\t" + self.format_prop(prop) + "\n" for prop in self.members])
+		out += "};\n\n"
+		out += "typedef struct {name} {typedef};\n\n".format(name=self.name, typedef=self.typedef_name)
+
+		return out
+
 	def __repr__(self) -> str:
 		out = ""
 		for prop in self.members:
 			out += "{:10} : {}\n".format(prop.name, prop.proptype)
 		return out
+
+	@staticmethod
+	def format_prop(prop: SqlColumn):
+		"""
+		Formats the struct memeber for generating header files.
+		"""
+		if prop.proptype == SqlType.VARCHAR:
+			return "char {name}[{size}];".format(name=prop.name, size=prop.size)
+		elif prop.proptype == SqlType.TEXT:
+			return "char {name}[{size}];".format(name=prop.name, size=prop.size)
+		elif prop.proptype == SqlType.PK_LONG:
+			return "uint {name};".format(name=prop.name)
+		elif prop.proptype == SqlType.FK_LONG:
+			return "struct {name}* {name};".format(name=prop.name.replace("_id", "").replace("id_", ""))
+		elif prop.proptype == SqlType.LONG:
+			return "uint {name};".format(name=prop.name)
+		elif prop.proptype == SqlType.DATE:
+			return "struct tm {name};".format(name=prop.name)
+		else:
+			msg = f"SQL type not handled '{prop}'"
+			assert False, msg
 
 	def col_count(self):
 		"""
@@ -145,7 +175,8 @@ class Struct:
 						(({name}*) row->data)->{col_name} = NULL;
 					}} else {{
 						(({name}*) row->data)->{col_name} = {col_name}_find_by_id({col}_buffer);
-					}}""".format(index=i, col=prop.name, col_name=prop.name.replace("_id", "").replace("id_", ""), name=self.typedef_name)
+					}}""".format(index=i, col=prop.name, col_name=prop.name.replace("_id", "").replace("id_", ""),
+				                 name=self.typedef_name)
 			else:
 				msg = f"SQL type not handled '{prop}'"
 				assert False, msg
@@ -303,7 +334,7 @@ class Struct:
 		out += "MYSQL_BIND param[PARAM_COUNT];\n"
 		out += "memset(&param, 0, sizeof(param));\n"
 		for prop in self.members:
-			if prop.proptype in [ SqlType.VARCHAR, SqlType.TEXT]:
+			if prop.proptype in [SqlType.VARCHAR, SqlType.TEXT]:
 				out += self.col_param_length(prop, func_ref)
 		return out
 

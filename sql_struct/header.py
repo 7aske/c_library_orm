@@ -1,40 +1,64 @@
+from struct import Struct
+from typing import List
+
+from function import MacroDefinition, FunctionTemplate
 from sql_types import SqlColumn, SqlType
 import os
 
 
 class Header:
-	def __init__(self, struct):
-		self.struct = struct
+	def __init__(self):
+		self.global_includes: List[str] = []
+		self.local_includes: List[str] = []
+		self.pragmas: List[str] = []
+		self.macros_def: List[MacroDefinition] = []
+		self.functions: List[FunctionTemplate] = []
+		self.structs = []
+		self.header_guard = None
 
-	def format_prop(self, prop: SqlColumn):
+	def add_macro(self, macro: MacroDefinition):
+		self.macros_def.append(macro)
 
-		if prop.proptype == SqlType.VARCHAR:
-			return "char {name}[{size}];".format(name=prop.name, size=prop.size)
-		elif prop.proptype == SqlType.TEXT:
-			return "char {name}[{size}];".format(name=prop.name, size=prop.size)
-		elif prop.proptype == SqlType.PK_LONG:
-			return "uint {name};".format(name=prop.name)
-		elif prop.proptype == SqlType.FK_LONG:
-			return "struct {name}* {name};".format(name=prop.name.replace("_id", "").replace("id_", ""))
-		elif prop.proptype == SqlType.LONG:
-			return "uint {name};".format(name=prop.name)
-		elif prop.proptype == SqlType.DATE:
-			return "struct tm {name};".format(name=prop.name)
-		else:
-			msg = f"SQL type not handled '{prop}'"
-			assert False, msg
+	def add_pragma(self, pragma: str):
+		self.pragmas.append(pragma)
+
+	def add_local_include(self, incl: str):
+		self.local_includes.append(incl)
+
+	def add_global_include(self, incl: str):
+		self.global_includes.append(incl)
+
+	def add_function(self, func: FunctionTemplate):
+		self.functions.append(func)
+
+	def add_struct(self, struct: Struct):
+		self.structs.append(struct)
+
+	def set_header_guard(self, guard: str):
+		self.header_guard = guard
 
 	def __str__(self):
-		assert len(self.struct.methods) > 0
+		assert self.header_guard is not None
 		out = ""
-		out += "#ifndef __{uname}_DB_STRUCT_{struct}_H\n".format(struct=self.struct.name.upper(), uname=os.getlogin())
-		out += "#define __{uname}_DB_STRUCT_{struct}_H\n\n".format(struct=self.struct.name.upper(), uname=os.getlogin())
+		out += "#ifndef {header_guard}\n".format(header_guard=self.header_guard)
+		out += "#define {header_guard}\n\n".format(header_guard=self.header_guard)
 
-		out += "struct {name} {{\n".format(name=self.struct.name)
-		out += "".join(["\t" + self.format_prop(prop) + "\n" for prop in self.struct.members])
-		out += "};\n\n"
-		out += "typedef struct {name} {typedef};\n\n".format(name=self.struct.name, typedef=self.struct.typedef_name)
-		out += "\n\n".join([func.get_declaration() for func in self.struct.methods])
+		out += "".join([f"#pragma {pragma}\n" for pragma in self.pragmas])
+		out += "\n"
+		out += "".join([str(macro) + "\n" for macro in self.macros_def])
+		out += "".join([f"#include <{incl}>\n" for incl in self.global_includes])
+		out += "\n"
+		out += "".join([f"#include \"{incl}\"\n" for incl in self.local_includes])
+		out += "\n"
+
+		out += "\n".join([str(struct) for struct in self.structs])
+
+		for struct in self.structs:
+			out += "\n\n".join([func.get_declaration() for func in struct.methods])
+
+		out += "\n\n".join([func.get_declaration() for func in self.functions])
+
+		out += "".join([macro.undef() for macro in self.macros_def])
 		out += "\n\n#endif\n"
 
 		return out
