@@ -27,7 +27,10 @@ uint municipality_insert(MUNICIPALITY* municipalityT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (municipalityT->region->id_region == 0) {
+	if (municipalityT->region == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "municipality", "region");
+		return 0U;
+	} else if (municipalityT->region->id_region == 0) {
 		region_insert(municipalityT->region);
 	} else {
 		region_update(municipalityT->region);
@@ -266,6 +269,8 @@ MUNICIPALITY* municipality_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {

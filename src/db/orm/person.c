@@ -296,6 +296,8 @@ PERSON* person_find_by_id(uint id) {
 	free(param[0].buffer);
 	
 
+if (res->results == NULL) { return NULL; }
+
 	out = res->results->data;
 	if (res->count == 1) {
 		free(res->results);

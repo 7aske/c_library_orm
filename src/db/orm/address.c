@@ -29,7 +29,10 @@ uint address_insert(ADDRESS* addressT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (addressT->municipality->id_municipality == 0) {
+	if (addressT->municipality == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "address", "municipality");
+		return 0U;
+	} else if (addressT->municipality->id_municipality == 0) {
 		municipality_insert(addressT->municipality);
 	} else {
 		municipality_update(addressT->municipality);
@@ -292,6 +295,8 @@ ADDRESS* address_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {

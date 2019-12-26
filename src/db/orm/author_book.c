@@ -25,12 +25,18 @@ uint author_book_insert(AUTHOR_BOOK* author_bookT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (author_bookT->book->id_book == 0) {
+	if (author_bookT->book == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "author_book", "book");
+		return 0U;
+	} else if (author_bookT->book->id_book == 0) {
 		book_insert(author_bookT->book);
 	} else {
 		book_update(author_bookT->book);
 	}
-	if (author_bookT->author->id_author == 0) {
+	if (author_bookT->author == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "author_book", "author");
+		return 0U;
+	} else if (author_bookT->author->id_author == 0) {
 		author_insert(author_bookT->author);
 	} else {
 		author_update(author_bookT->author);
@@ -263,6 +269,8 @@ AUTHOR_BOOK* author_book_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {

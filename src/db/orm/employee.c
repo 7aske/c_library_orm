@@ -27,12 +27,18 @@ uint employee_insert(EMPLOYEE* employeeT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (employeeT->person->id_person == 0) {
+	if (employeeT->person == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "employee", "person");
+		return 0U;
+	} else if (employeeT->person->id_person == 0) {
 		person_insert(employeeT->person);
 	} else {
 		person_update(employeeT->person);
 	}
-	if (employeeT->library->id_library == 0) {
+	if (employeeT->library == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "employee", "library");
+		return 0U;
+	} else if (employeeT->library->id_library == 0) {
 		library_insert(employeeT->library);
 	} else {
 		library_update(employeeT->library);
@@ -289,6 +295,8 @@ EMPLOYEE* employee_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {

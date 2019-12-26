@@ -343,6 +343,7 @@ def body_find_by_id(struct: Struct, func: FunctionTemplate):
 	func.add_block(struct.get_col_param_buffer(["id_{}".format(struct.name)]))
 	func.add_block("res = {}_execute_find(QUERY, param, PARAM_COUNT);".format(struct.name))
 	func.add_block(struct.col_param_buffer_free(1))
+	func.add_block("if (res->results == NULL) { return NULL; }")
 	func.add_block("""out = res->results->data;
 			if (res->count == 1) {{
 				free(res->results);

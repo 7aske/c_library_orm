@@ -318,8 +318,11 @@ class Struct:
 		out = "/* Generated using get_update_fk() */\n"
 		for prop in self.members:
 			if prop.proptype == SqlType.FK_LONG:
-				out += """			
-				if ({name}T->{fk_name}->{fk_id} == 0) {{
+				out += """
+				if ({name}T->{fk_name} == NULL){{
+					fprintf(stderr, "%s->%s is NULL\\n", "{name}", "{fk_name}");
+					return 0U;
+				}} else if ({name}T->{fk_name}->{fk_id} == 0) {{
 					{fk_name}_insert({name}T->{fk_name});
 				}} else {{
 					{fk_name}_update({name}T->{fk_name});

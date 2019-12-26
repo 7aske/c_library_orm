@@ -25,12 +25,18 @@ uint rent_insert(RENT* rentT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (rentT->reader->id_reader == 0) {
+	if (rentT->reader == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "rent", "reader");
+		return 0U;
+	} else if (rentT->reader->id_reader == 0) {
 		reader_insert(rentT->reader);
 	} else {
 		reader_update(rentT->reader);
 	}
-	if (rentT->book_specimen->id_book_specimen == 0) {
+	if (rentT->book_specimen == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "rent", "book_specimen");
+		return 0U;
+	} else if (rentT->book_specimen->id_book_specimen == 0) {
 		book_specimen_insert(rentT->book_specimen);
 	} else {
 		book_specimen_update(rentT->book_specimen);
@@ -282,6 +288,8 @@ RENT* rent_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {

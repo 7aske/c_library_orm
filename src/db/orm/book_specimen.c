@@ -27,12 +27,18 @@ uint book_specimen_insert(BOOK_SPECIMEN* book_specimenT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (book_specimenT->library->id_library == 0) {
+	if (book_specimenT->library == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "book_specimen", "library");
+		return 0U;
+	} else if (book_specimenT->library->id_library == 0) {
 		library_insert(book_specimenT->library);
 	} else {
 		library_update(book_specimenT->library);
 	}
-	if (book_specimenT->book->id_book == 0) {
+	if (book_specimenT->book == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "book_specimen", "book");
+		return 0U;
+	} else if (book_specimenT->book->id_book == 0) {
 		book_insert(book_specimenT->book);
 	} else {
 		book_update(book_specimenT->book);
@@ -289,6 +295,8 @@ BOOK_SPECIMEN* book_specimen_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {

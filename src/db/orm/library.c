@@ -27,7 +27,10 @@ uint library_insert(LIBRARY* libraryT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (libraryT->address->id_address == 0) {
+	if (libraryT->address == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "library", "address");
+		return 0U;
+	} else if (libraryT->address->id_address == 0) {
 		address_insert(libraryT->address);
 	} else {
 		address_update(libraryT->address);
@@ -266,6 +269,8 @@ LIBRARY* library_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {

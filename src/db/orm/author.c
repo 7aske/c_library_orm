@@ -27,7 +27,10 @@ uint author_insert(AUTHOR* authorT) {
 
 	/* Generated using get_update_fk() */
 	
-	if (authorT->person->id_person == 0) {
+	if (authorT->person == NULL){
+		fprintf(stderr, "%s->%s is NULL\n", "author", "person");
+		return 0U;
+	} else if (authorT->person->id_person == 0) {
 		person_insert(authorT->person);
 	} else {
 		person_update(authorT->person);
@@ -266,6 +269,8 @@ AUTHOR* author_find_by_id(uint id) {
 	/* Generated using col_param_buffer_free() */
 	free(param[0].buffer);
 	
+
+if (res->results == NULL) { return NULL; }
 
 	out = res->results->data;
 	if (res->count == 1) {
