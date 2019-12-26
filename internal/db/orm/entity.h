@@ -1,5 +1,5 @@
-#ifndef __nik_DB_ENTITY_H
-#define __nik_DB_ENTITY_H
+#ifndef __NIK_LIBRARY_DB_ENTITY_H
+#define __NIK_LIBRARY_DB_ENTITY_H
 
 #pragma once
 

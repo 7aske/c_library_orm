@@ -1,6 +1,6 @@
 
-#ifndef nik_APP_SQL_RESULT_H
-#define nik_APP_SQL_RESULT_H
+#ifndef __nik_LIBRARY_APP_SQL_RESULT_H
+#define __nik_LIBRARY_APP_SQL_RESULT_H
 
 typedef unsigned int uint;
 

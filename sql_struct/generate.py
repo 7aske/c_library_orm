@@ -1,31 +1,38 @@
-import pprint
 from shutil import copy2
 from subprocess import Popen
 from os.path import exists
 from typing import List
+from datetime import datetime as dt
+
+import pprint
+import os
+import json
 
 from function import FunctionTemplate, FunctionArgument, MacroDefinition
 from header import Header
 from struct import Struct
 from sql_types import SqlType, SqlColumn
-from datetime import datetime as dt
-import os
-import json
+
+proj_name = ""
 
 
 def main():
+	global proj_name
 	out_dir = ".."
-	inp_file = "library_def.sql"
+	# out_dir = "dist"
+
+	inp_file = "ddl/library.sql"
 
 	assert exists(inp_file)
 
-	name = os.path.splitext(inp_file)[0]
+	name = os.path.splitext(os.path.basename(inp_file))[0]
+	proj_name = name
 	node = Popen(["node", "index.js", inp_file], stdout=None)
 	node.wait()
 
 	assert node.returncode == 0
 
-	with open(name + ".json", "r") as file:
+	with open("ddl/" + name + ".json", "r") as file:
 		json_string = file.read()
 
 	json_data = json.loads(json_string)
@@ -69,7 +76,6 @@ def main():
 
 			if "foreignKeys" in table.keys():
 				if {"column": col_name} in [fk["columns"][0] for fk in table["foreignKeys"]]:
-					# if col_type_sql != SqlType.PK_LONG:
 					col_type_sql = SqlType.FK_LONG
 			elif "indexes" in table.keys():
 				if {"column": col_name} in [fk["columns"][0] for fk in table["indexes"]]:
@@ -99,8 +105,8 @@ def main():
 
 def generate_sql_result_h(structs: List[Struct]):
 	out = """
-#ifndef {uname}_APP_SQL_RESULT_H
-#define {uname}_APP_SQL_RESULT_H
+#ifndef __{uname}_{proj}_APP_SQL_RESULT_H
+#define __{uname}_{proj}_APP_SQL_RESULT_H
 
 typedef unsigned int uint;
 
@@ -123,13 +129,14 @@ typedef struct sql_result SQL_RESULT;
 typedef struct sql_result_row SQL_RESULT_ROW;
 
 #endif //{uname}_APP_SQL_RESULT_H
-""".format(uname=os.getlogin(), entities="".join(["\t" + struct.name.upper() + "_E,\n" for struct in structs]))
+""".format(proj=proj_name.upper(), uname=os.getlogin(),
+	       entities="".join(["\t" + struct.name.upper() + "_E,\n" for struct in structs]))
 	return out
 
 
 def generate_entity_h(structs: List[Struct]):
 	entity_h = Header()
-	entity_h.set_header_guard("__{name}_DB_ENTITY_H".format(name=os.getlogin()))
+	entity_h.set_header_guard("__{name}_{proj}_DB_ENTITY_H".format(name=os.getlogin().upper(), proj=proj_name.upper()))
 	entity_h.add_pragma("once")
 	entity_h.add_global_include("string.h")
 	entity_h.add_global_include("stdlib.h")
@@ -204,7 +211,9 @@ def save_to_file(struct: Struct, out_dir: str = "out"):
 
 def generate_h(struct: Struct):
 	header = Header()
-	header.set_header_guard("__{uname}_DB_ENTITY_STRUCT_{name}_H".format(name=struct.name.upper(), uname=os.getlogin()))
+	header.set_header_guard(
+		"__{uname}_{proj}_DB_ENTITY_STRUCT_{name}_H".format(name=struct.name.upper(), proj=proj_name.upper(),
+		                                                    uname=os.getlogin()))
 	header.add_pragma("once")
 	header.add_local_include("db/orm/entity.h")
 	header.add_struct(struct)
