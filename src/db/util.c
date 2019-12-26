@@ -1,6 +1,3 @@
-//
-// Created by nik on 12/26/19.
-//
 #define _XOPEN_SOURCE 700
 
 #include <db/util.h>

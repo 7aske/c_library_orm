@@ -14,13 +14,13 @@ import json
 
 
 def main():
-	out_dir = "out"
-	inp_file = "aircompany.sql"
+	out_dir = ".."
+	inp_file = "library_def.sql"
 
 	assert exists(inp_file)
 
 	name = os.path.splitext(inp_file)[0]
-	node = Popen(["node", "index.js", inp_file])
+	node = Popen(["node", "index.js", inp_file], stdout=None)
 	node.wait()
 
 	assert node.returncode == 0
@@ -50,7 +50,7 @@ def main():
 				else:
 					msg = f"SQL type size not handled '{col_name}' in struct '{struct_name}'"
 					assert False, msg
-			print(struct_name)
+
 			if {"column": col_name} in table["primaryKey"]["columns"]:
 				col_type_sql = SqlType.PK_LONG
 			elif col_type == "varchar":
@@ -78,23 +78,23 @@ def main():
 			# assert col_type_sql is not None, err_msg
 			if col_type_sql is not None:
 				structs_members.append(SqlColumn(col_name, col_type_sql, col_size))
-		print(struct_name, structs_members)
+		print(struct_name)
+		[print(mem) for mem in structs_members]
 		structs.append(Struct(struct_name, structs_members))
 
 	for struct in structs:
 		save_to_file(struct, out_dir)
-	# print(struct.name.upper() + "_E")
 
 	with open(out_dir + "/internal/db/orm/entity.h", "w") as file:
 		file.write(generate_entity_h(structs))
 
-	with open(out_dir + "/internal/db/util.h", "w") as file:
+	with open(out_dir + "/internal/db/sql_result.h", "w") as file:
 		file.write(generate_sql_result_h(structs))
 	for root, dirs, files in os.walk('common', topdown=True):
 		path = root.split(os.sep)
 		for file in files:
 			pth = "/".join(path[1:]) + "/" + file
-			copy2("common" + "/" + "/".join(path[1:]) + "/" + file, out_dir + "/" + "/".join(path[1:]) + "/" + file)
+			copy2("common" + "/" + pth, out_dir + "/" + pth)
 
 
 def generate_sql_result_h(structs: List[Struct]):

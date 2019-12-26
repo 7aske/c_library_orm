@@ -1,7 +1,3 @@
-//
-// Created by nik on 12/20/19.
-//
-
 #include "db/dbc.h"
 
 

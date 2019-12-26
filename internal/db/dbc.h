@@ -1,9 +1,5 @@
-//
-// Created by nik on 12/20/19.
-//
-
-#ifndef IT350_PZ_APP_DBC_H
-#define IT350_PZ_APP_DBC_H
+#ifndef APP_DBC_H
+#define APP_DBC_H
 
 #pragma once
 
