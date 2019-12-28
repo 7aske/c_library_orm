@@ -31,4 +31,6 @@ int library_delete(LIBRARY* libraryT);
 
 SQL_RESULT* library_find_all();
 
+void library_free(LIBRARY** ptr);
+
 #endif

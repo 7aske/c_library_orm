@@ -31,4 +31,6 @@ int municipality_delete(MUNICIPALITY* municipalityT);
 
 SQL_RESULT* municipality_find_all();
 
+void municipality_free(MUNICIPALITY** ptr);
+
 #endif

@@ -58,16 +58,60 @@ void mysql_res_free(SQL_RESULT** res) {
 	assert(res != NULL);
 	SQL_RESULT_ROW* curr;
 	SQL_RESULT_ROW* prev;
+	void (* free_func)(void**) = NULL;
+
 	if (*res != NULL) {
+		switch((*res)->type){
+		
+			case ADDRESS_E:
+			free_func = (void (*)(void**)) address_free;
+			break;
+			case AUTHOR_E:
+			free_func = (void (*)(void**)) author_free;
+			break;
+			case AUTHOR_BOOK_E:
+			free_func = (void (*)(void**)) author_book_free;
+			break;
+			case BOOK_E:
+			free_func = (void (*)(void**)) book_free;
+			break;
+			case BOOK_SPECIMEN_E:
+			free_func = (void (*)(void**)) book_specimen_free;
+			break;
+			case EMPLOYEE_E:
+			free_func = (void (*)(void**)) employee_free;
+			break;
+			case LIBRARY_E:
+			free_func = (void (*)(void**)) library_free;
+			break;
+			case MUNICIPALITY_E:
+			free_func = (void (*)(void**)) municipality_free;
+			break;
+			case PERSON_E:
+			free_func = (void (*)(void**)) person_free;
+			break;
+			case READER_E:
+			free_func = (void (*)(void**)) reader_free;
+			break;
+			case REGION_E:
+			free_func = (void (*)(void**)) region_free;
+			break;
+			case RENT_E:
+			free_func = (void (*)(void**)) rent_free;
+			break;
+		}
 		curr = (*res)->results;
 		while (curr != NULL) {
+			assert(free_func != NULL);
+			
 			prev = curr;
 			curr = curr->next;
-			free(prev->data);
+			free_func(&prev->data);
 			free(prev);
 		}
 		free(*res);
 		*res = NULL;
 	}
 
-}
+} 
+	

@@ -32,4 +32,6 @@ int employee_delete(EMPLOYEE* employeeT);
 
 SQL_RESULT* employee_find_all();
 
+void employee_free(EMPLOYEE** ptr);
+
 #endif

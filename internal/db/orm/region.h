@@ -30,4 +30,6 @@ int region_delete(REGION* regionT);
 
 SQL_RESULT* region_find_all();
 
+void region_free(REGION** ptr);
+
 #endif

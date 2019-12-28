@@ -31,4 +31,6 @@ int author_delete(AUTHOR* authorT);
 
 SQL_RESULT* author_find_all();
 
+void author_free(AUTHOR** ptr);
+
 #endif

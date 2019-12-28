@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <form.h>
 
+
+
 #include "db/dbc.h"
 #include "ui/state.h"
 
@@ -96,7 +98,7 @@ int main() {
 		refresh();
 		handle_input(&state);
 	}
-
+	mysql_res_free(&state.curr_list);
 	return 0;
 }
 

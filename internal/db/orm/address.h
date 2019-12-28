@@ -32,4 +32,6 @@ int address_delete(ADDRESS* addressT);
 
 SQL_RESULT* address_find_all();
 
+void address_free(ADDRESS** ptr);
+
 #endif

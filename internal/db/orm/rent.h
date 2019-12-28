@@ -32,4 +32,6 @@ int rent_delete(RENT* rentT);
 
 SQL_RESULT* rent_find_all();
 
+void rent_free(RENT** ptr);
+
 #endif

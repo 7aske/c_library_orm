@@ -31,4 +31,6 @@ int reader_delete(READER* readerT);
 
 SQL_RESULT* reader_find_all();
 
+void reader_free(READER** ptr);
+
 #endif

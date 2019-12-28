@@ -32,4 +32,6 @@ int person_delete(PERSON* personT);
 
 SQL_RESULT* person_find_all();
 
+void person_free(PERSON** ptr);
+
 #endif

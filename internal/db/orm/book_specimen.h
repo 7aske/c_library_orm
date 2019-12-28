@@ -32,4 +32,6 @@ int book_specimen_delete(BOOK_SPECIMEN* book_specimenT);
 
 SQL_RESULT* book_specimen_find_all();
 
+void book_specimen_free(BOOK_SPECIMEN** ptr);
+
 #endif

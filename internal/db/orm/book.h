@@ -32,4 +32,6 @@ int book_delete(BOOK* bookT);
 
 SQL_RESULT* book_find_all();
 
+void book_free(BOOK** ptr);
+
 #endif
