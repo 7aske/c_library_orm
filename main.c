@@ -2,46 +2,9 @@
 #include <stdbool.h>
 #include <form.h>
 
-
-
 #include "db/dbc.h"
 #include "ui/state.h"
-
-#define ADDRESS_FMTH       "%3s %4s %29.29s %10.10s %28.28s"
-#define ADDRESS_FMT        "%3d %4d %29.29s %10.10s %28.28s"
-
-#define AUTHOR_BOOK_FMTH   "%3s %4s %14.14s %14.14s %-24.24s %14.14s"
-#define AUTHOR_BOOK_FMT    "%3d %4d %14.14s %14.14s %-24.24s %14.14s"
-
-#define AUTHOR_FMTH        "%3s %4s %14.14s %14.14s %39.39s"
-#define AUTHOR_FMT         "%3d %4d %14.14s %14.14s %39.39s"
-
-#define BOOK_FMTH          "%3s %4s %-41.41s %14.14s %12.12s"
-#define BOOK_FMT           "%3d %4d %-41.41s %14.14s %12.12s"
-
-#define BOOK_SPECIMEN_FMTH "%3s %4s %-32.32s %13.13s %10.10s %11.11s"
-#define BOOK_SPECIMEN_FMT  "%3d %4d %-32.32s %13.13s %10.10s %11.11s"
-
-#define EMPLOYEE_FMTH      "%3s %4s %14.14s %14.14s %20.20s %18.18s"
-#define EMPLOYEE_FMT       "%3d %4d %14.14s %14.14s %20.20s %18.18s"
-
-#define PERSON_FMTH        "%3s %4s %14.14s %14.14s %40.40s"
-#define PERSON_FMT         "%3d %4d %14.14s %14.14s %40.40s"
-
-#define LIBRARY_FMTH       "%3s %4s %26.26s %16.16s %8.8s %16.16s"
-#define LIBRARY_FMT        "%3d %4d %26.26s %16.16s %8.8s %16.16s"
-
-#define MUNICIPALITY_FMTH  "%3s %4s %34.34s %34.34s"
-#define MUNICIPALITY_FMT   "%3d %4d %34.34s %34.34s"
-
-#define READER_FMTH        "%3s %4s %34.34s %34.34s"
-#define READER_FMT         "%3d %4d %34.34s %34.34s"
-
-#define RENT_FMTH          "%3s %4s %16.16s %10.10s %-30.30s %10.10s"
-#define RENT_FMT           "%3d %4d %16.16s %10.10s %-30.30s %10.10s"
-
-#define REGION_FMTH        "%3s %4s %69.69s"
-#define REGION_FMT         "%3d %4d %69.69s"
+#include "ui/format.h"
 
 volatile static int running = true;
 
@@ -52,14 +15,6 @@ void print_list(state_t* state);
 int handle_input(state_t* state);
 
 void change_list(state_t* state, int inc);
-
-char* _fmt_date(struct tm* ts) {
-	#define DATE_FMT "%02d-%02d-%04d"
-	static char fmt[11];
-	sprintf(fmt, DATE_FMT, ts->tm_mday, ts->tm_mon, ts->tm_year);
-	return fmt;
-	#undef DATE_FMT
-}
 
 int main() {
 	system("env | grep -i TERM");
@@ -72,30 +27,24 @@ int main() {
 	wresize(win, APP_ROW, APP_COL);
 
 	state_t state;
-	state.curr_list = NULL;
-	state.curr_sel_idx = 0;
-	state.curr_line_pos = 1;
-	state.list_type = 0;
-	state.list_types[0] = REGION_E;
-	state.list_types[1] = MUNICIPALITY_E;
-	state.list_types[2] = ADDRESS_E;
-	state.list_types[3] = LIBRARY_E;
-	state.list_types[4] = EMPLOYEE_E;
-	state.list_types[5] = PERSON_E;
-	state.list_types[6] = AUTHOR_E;
-	state.list_types[7] = AUTHOR_BOOK_E;
-	state.list_types[8] = BOOK_E;
-	state.list_types[9] = BOOK_SPECIMEN_E;
-	state.list_types[10] = READER_E;
-	state.list_types[11] = RENT_E;
+	init_state(&state);
 
 	change_list(&state, 0);
+
+	state.pwin = newwin(12, 40, 1, 1);
 
 	while (running) {
 		print_list(&state);
 		wborder(win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER,
 				ACS_LRCORNER);
 		refresh();
+		if (state.pwin != NULL) {
+			// wborder(state.pwin, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER,
+			// 		ACS_LRCORNER);
+			mvwprintw(state.pwin, 10, 10, "HELLO");
+			box(state.pwin, 0, 0);
+			wrefresh(state.pwin);
+		}
 		handle_input(&state);
 	}
 	mysql_res_free(&state.curr_list);
@@ -213,7 +162,7 @@ void print_list(state_t* state) {
 					printw(READER_FMT, curr_idx + 1,
 						   ((READER*) curr->data)->id_reader,
 						   ((READER*) curr->data)->username,
-						   // ((READER*) curr->data)->password);
+							// ((READER*) curr->data)->password);
 						   "******************");
 					break;
 				case RENT_E:
@@ -340,57 +289,18 @@ int handle_input(state_t* state) {
 			}
 			clear();
 			break;
+		case 'a':
+			if (state->pwin == NULL) {
+				state->pwin = newwin(24, 40, 0, 0);
+				wrefresh(state->pwin);
+			}
+			break;
+		case 's':
+			if (state->pwin != NULL) {
+				delwin(state->pwin);
+			}
+			break;
 		default:
-			break;
-	}
-}
-
-void change_list(state_t* state, int inc) {
-	int len = ((int) sizeof(state->list_types) / (int) sizeof(state->list_types[0]));
-	if (state->list_type == 0 && inc == -1) {
-		state->list_type = len - 1;
-	} else {
-		state->list_type = (state->list_type + inc) % len;
-	}
-	if (state->curr_list != NULL) {
-		mysql_res_free(&state->curr_list);
-	}
-	switch (state->list_types[state->list_type]) {
-		case MUNICIPALITY_E:
-			state->curr_list = municipality_find_all();
-			break;
-		case ADDRESS_E:
-			state->curr_list = address_find_all();
-			break;
-		case REGION_E:
-			state->curr_list = region_find_all();
-			break;
-		case LIBRARY_E:
-			state->curr_list = library_find_all();
-			break;
-		case AUTHOR_E:
-			state->curr_list = author_find_all();
-			break;
-		case AUTHOR_BOOK_E:
-			state->curr_list = author_book_find_all();
-			break;
-		case BOOK_E:
-			state->curr_list = book_find_all();
-			break;
-		case BOOK_SPECIMEN_E:
-			state->curr_list = book_specimen_find_all();
-			break;
-		case EMPLOYEE_E:
-			state->curr_list = employee_find_all();
-			break;
-		case PERSON_E:
-			state->curr_list = person_find_all();
-			break;
-		case READER_E:
-			state->curr_list = reader_find_all();
-			break;
-		case RENT_E:
-			state->curr_list = rent_find_all();
 			break;
 	}
 }
