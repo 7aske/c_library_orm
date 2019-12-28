@@ -14,7 +14,7 @@ struct state {
 	int curr_sel_idx;
 	int curr_line_pos;
 	SQL_RESULT* curr_list;
-	ENTITY_TYPE list_types[4];
+	ENTITY_TYPE list_types[12];
 	int list_type;
 };
 
@@ -24,27 +24,27 @@ typedef struct state state_t;
 char const* list_type_str(ENTITY_TYPE type) {
 	switch (type) {
 		case ADDRESS_E:
-			return "ADDRESS";
+			return "ADDR";
 		case AUTHOR_E:
-			return "AUTHOR";
+			return "ATHR";
 		case AUTHOR_BOOK_E:
-			return "AUTH BOOK";
+			return "ATBK";
 		case BOOK_E:
 			return "BOOK";
 		case BOOK_SPECIMEN_E:
-			return "BOOK SPEC";
+			return "BKSP";
 		case EMPLOYEE_E:
-			return "EMPLOYEE";
+			return "EMPL";
 		case LIBRARY_E:
-			return "LIBRARY";
+			return "LIBR";
 		case MUNICIPALITY_E:
-			return "MUNICIP";
+			return "MUNI";
 		case PERSON_E:
-			return "PERSON";
+			return "PERS";
 		case READER_E:
-			return "READER";
+			return "READ";
 		case REGION_E:
-			return "REGION";
+			return "REGI";
 		case RENT_E:
 			return "RENT";
 	}
