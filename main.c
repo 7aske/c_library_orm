@@ -5,6 +5,42 @@
 #include "db/dbc.h"
 #include "ui/state.h"
 
+#define ADDRESS_FMTH       "%3s %4s %29.29s %10.10s %28.28s"
+#define ADDRESS_FMT        "%3d %4d %29.29s %10.10s %28.28s"
+
+#define AUTHOR_BOOK_FMTH   "%3s %4s %8.8s %8.8s %16.16s %13.13s"
+#define AUTHOR_BOOK_FMT    "%3d %4d %8.8s %8.8s %16.16s %13.13s"
+
+#define AUTHOR_FMTH        "%3s %4s %8.8s %8.8s %51.51s"
+#define AUTHOR_FMT         "%3d %4d %8.8s %8.8s %51.51s"
+
+#define BOOK_FMTH          "%3s %4s %-41.41s %14.14s %12.12s"
+#define BOOK_FMT           "%3d %4d %-41.41s %14.14s %12.12s"
+
+#define BOOK_SPECIMEN_FMTH "%3s %4s %32.32s %13.13s %10.10s %8.8s"
+#define BOOK_SPECIMEN_FMT  "%3d %4d %32.32s %13.13s %10.10s %8.8s"
+
+#define EMPLOYEE_FMTH      "%3s %4s %8.8s %8.8s %16.16s %8.8s"
+#define EMPLOYEE_FMT       "%3d %4d %8.8s %8.8s %16.16s %8.8s"
+
+#define LIBRARY_FMTH       "%3s %4s %26.26s %16.16s %8.8s %16.16s"
+#define LIBRARY_FMT        "%3d %4d %26.26s %16.16s %8.8s %16.16s"
+
+#define MUNICIPALITY_FMTH  "%3s %4s %34.34s %34.34s"
+#define MUNICIPALITY_FMT   "%3d %4d %34.34s %34.34s"
+
+#define PERSON_FMTH        "%3s %4s %27.27s %27.27s %13.14s"
+#define PERSON_FMT         "%3d %4d %27.27s %27.27s %13.14s"
+
+#define READER_FMTH        "%3s %4s %16.16s %16.16s"
+#define READER_FMT         "%3d %4d %16.16s %16.16s"
+
+#define RENT_FMTH          "%3s %4s %16.16s %10.10s %10.10s"
+#define RENT_FMT           "%3d %4d %16.16s %10.10s %10.10s"
+
+#define REGION_FMTH        "%3s %4s %69.69s"
+#define REGION_FMT         "%3d %4d %69.69s"
+
 volatile static int running = true;
 
 WINDOW* win;
@@ -15,6 +51,13 @@ int handle_input(state_t* state);
 
 void change_list(state_t* state, int inc);
 
+char* _fmt_date(struct tm* ts){
+	#define DATE_FMT "%02d-%02d-%04d"
+	static char fmt[11];
+	sprintf(fmt, DATE_FMT, ts->tm_mday, ts->tm_mon, ts->tm_year);
+	return fmt;
+	#undef DATE_FMT
+}
 
 int main() {
 	system("env | grep -i TERM");
@@ -72,15 +115,19 @@ void print_list(state_t* state) {
 	int col, row;
 	int curr_idx = 0;
 	int offset;
-	if (state->curr_line_pos > APP_ROW / 2) {
-		offset = state->curr_line_pos - APP_ROW / 2 - 1;
+	if (state->curr_sel_idx > APP_ROW / 2) {
+		if (state->curr_sel_idx > state->curr_list->count - APP_ROW / 2 - 1) {
+			offset = (int)state->curr_list->count - APP_ROW + USED_LINES;
+		} else {
+			offset = state->curr_sel_idx - APP_ROW / 2 - 1;
+		}
 	} else {
 		offset = -USED_LINES;
 	}
 
 	struct sql_result_row* curr = state->curr_list->results;
 
-	while (curr != NULL && curr_idx - offset + USED_LINES < APP_ROW - 1) {
+	while (curr != NULL && curr_idx - offset + USED_LINES <= APP_ROW - 1) {
 		if (curr_idx >= offset) {
 			row = curr_idx + 1 - offset;
 			col = 1;
@@ -91,25 +138,25 @@ void print_list(state_t* state) {
 			}
 			switch (state->curr_list->type) {
 				case MUNICIPALITY_E:
-					printw("%2d %3d %16.16s %16.16s", curr_idx + 1,
+					printw(MUNICIPALITY_FMT, curr_idx + 1,
 						   ((MUNICIPALITY*) curr->data)->id_municipality,
 						   ((MUNICIPALITY*) curr->data)->name,
 						   ((MUNICIPALITY*) curr->data)->region->name);
 					break;
 				case REGION_E:
-					printw("%2d %3d %16.16s", curr_idx + 1,
+					printw(REGION_FMT, curr_idx + 1,
 						   ((REGION*) curr->data)->id_region,
 						   ((REGION*) curr->data)->name);
 					break;
 				case ADDRESS_E:
-					printw("%2d %3d %16.16s %8.8s %16.16s", curr_idx + 1,
+					printw(ADDRESS_FMT, curr_idx + 1,
 						   ((ADDRESS*) curr->data)->id_address,
 						   ((ADDRESS*) curr->data)->street,
 						   ((ADDRESS*) curr->data)->number,
 						   ((ADDRESS*) curr->data)->municipality->name);
 					break;
 				case LIBRARY_E:
-					printw("%2d %3d %16.16s %8.8s %8.8s %8.8s", curr_idx + 1,
+					printw(LIBRARY_FMT, curr_idx + 1,
 						   ((LIBRARY*) curr->data)->id_library,
 						   ((LIBRARY*) curr->data)->name,
 						   ((LIBRARY*) curr->data)->address->street,
@@ -117,20 +164,37 @@ void print_list(state_t* state) {
 						   ((LIBRARY*) curr->data)->address->municipality->name);
 					break;
 				case AUTHOR_E:
-					printw("%2s %3s %8.8s %8.8s %55.55s", curr_idx + 1,
+					printw(AUTHOR_FMT, curr_idx + 1,
 						   ((AUTHOR*) curr->data)->id_author,
 						   ((AUTHOR*) curr->data)->person->first_name,
 						   ((AUTHOR*) curr->data)->person->last_name,
 						   ((AUTHOR*) curr->data)->description);
 					break;
 				case AUTHOR_BOOK_E:
+					printw(AUTHOR_BOOK_FMT, curr_idx + 1,
+						   ((AUTHOR_BOOK*) curr->data)->id_author_book,
+						   ((AUTHOR_BOOK*) curr->data)->author->person->first_name,
+						   ((AUTHOR_BOOK*) curr->data)->author->person->last_name,
+						   ((AUTHOR_BOOK*) curr->data)->book->name,
+						   ((AUTHOR_BOOK*) curr->data)->book->isbn);
 					break;
 				case BOOK_E:
+					printw(BOOK_FMT, curr_idx + 1,
+						   ((BOOK*) curr->data)->id_book,
+						   ((BOOK*) curr->data)->name,
+						   ((BOOK*) curr->data)->isbn,
+						   _fmt_date(&((BOOK*) curr->data)->publish_date));
 					break;
 				case BOOK_SPECIMEN_E:
+					printw(BOOK_SPECIMEN_FMT, curr_idx + 1,
+						   ((BOOK_SPECIMEN*) curr->data)->id_book_specimen,
+						   ((BOOK_SPECIMEN*) curr->data)->book->name,
+						   ((BOOK_SPECIMEN*) curr->data)->book->isbn,
+						   _fmt_date(&((BOOK_SPECIMEN*) curr->data)->book->publish_date),
+						   ((BOOK_SPECIMEN*) curr->data)->library->name);
 					break;
 				case EMPLOYEE_E:
-					printw("%2s %3s %8.8s %8.8s %16.16s %8.8", curr_idx + 1,
+					printw(EMPLOYEE_FMT, curr_idx + 1,
 						   ((EMPLOYEE*) curr->data)->id_employee,
 						   ((EMPLOYEE*) curr->data)->person->first_name,
 						   ((EMPLOYEE*) curr->data)->person->last_name,
@@ -138,15 +202,24 @@ void print_list(state_t* state) {
 						   ((EMPLOYEE*) curr->data)->position);
 					break;
 				case PERSON_E:
-					printw("%2s %3s %8.8s %8.8s %13.13s", curr_idx + 1,
+					printw(PERSON_FMT, curr_idx + 1,
 						   ((PERSON*) curr->data)->id_person,
 						   ((PERSON*) curr->data)->first_name,
 						   ((PERSON*) curr->data)->last_name,
 						   ((PERSON*) curr->data)->jmbg);
 					break;
 				case READER_E:
+					printw(READER_FMT, curr_idx + 1,
+						   ((READER*) curr->data)->id_reader,
+						   ((READER*) curr->data)->username,
+						   ((READER*) curr->data)->password);
 					break;
 				case RENT_E:
+					printw(RENT_FMT, curr_idx + 1,
+						   ((RENT*) curr->data)->id_rent,
+						   ((RENT*) curr->data)->reader->username,
+						   ((RENT*) curr->data)->book_specimen->book_serial,
+						   _fmt_date(&((RENT*) curr->data)->due_date));
 					break;
 			}
 			attroff(COLOR_PAIR(1));
@@ -161,6 +234,7 @@ void print_list(state_t* state) {
 		addch(' ');
 		attroff(COLOR_PAIR(3));
 	}
+
 	/*HEADER*/
 	int len = sizeof(state->list_types) / sizeof(state->list_types[0]);
 	for (int i = 0; i < len; ++i) {
@@ -180,35 +254,40 @@ void print_list(state_t* state) {
 	attron(COLOR_PAIR(2));
 	switch (state->curr_list->type) {
 		case ADDRESS_E:
-			printw("%2s %3s %16.16s %8.8s %16.16s", "N", "ID", "STREET", "NUMBER", "MUNICIP");
+			printw(ADDRESS_FMTH, "N", "ID", "STREET", "NUMBER", "MUNICIPALITY");
 			break;
 		case AUTHOR_E:
-			printw("%2s %3s %8.8s %8.8s %55.55s", "N", "ID", "FNAME", "LNAME", "DESCRIPTION");
+			printw(AUTHOR_FMTH, "N", "ID", "FNAME", "LNAME", "DESCRIPTION");
 			break;
 		case AUTHOR_BOOK_E:
+			printw(AUTHOR_BOOK_FMTH, "N", "ID", "AFNAME", "ALNAME", "BKNAME", "ISBN");
 			break;
 		case BOOK_E:
+			printw(BOOK_FMTH, "N", "ID", "BOOK NAME", "ISBN", "PUB DATE");
 			break;
 		case BOOK_SPECIMEN_E:
+			printw(BOOK_SPECIMEN_FMTH, "N", "ID", "NAME", "ISBN", "PUB DATE", "LIBRARY");
 			break;
 		case EMPLOYEE_E:
-			printw("%2s %3s %8.8s %8.8s %16.16s %8.8s", "N", "ID", "FNAME", "LNAME", "LIBRARY", "POSITION");
+			printw(EMPLOYEE_FMTH, "N", "ID", "FIRST NAME", "LAST NAME", "LIBRARY", "POSITION");
 			break;
 		case LIBRARY_E:
-			printw("%2s %3s %16.16s %8.8s %8.8s %8.8s", "N", "ID", "NAME", "STREET", "NUMBER", "MUNICIP");
+			printw(LIBRARY_FMTH, "N", "ID", "LIBRARY NAME", "STREET", "NUMBER", "MUNICIPALITY");
 			break;
 		case MUNICIPALITY_E:
-			printw("%2s %3s %16.16s %16.16s", "N", "ID", "NAME", "REGION");
+			printw(MUNICIPALITY_FMTH, "N", "ID", "NAME", "REGION");
 			break;
 		case PERSON_E:
-			printw("%2s %3s %8.8s %8.8s %13.13s", "N", "ID", "FNAME", "LNAME", "JMBG");
+			printw(PERSON_FMTH, "N", "ID", "FIRST NAME", "LAST NAME", "JMBG");
 			break;
 		case READER_E:
+			printw(READER_FMTH, "N", "ID", "USERNAME", "PASSWORD");
 			break;
 		case REGION_E:
-			printw("%2s %3s %16.16s", "N", "ID", "NAME");
+			printw(REGION_FMTH, "N", "ID", "NAME");
 			break;
 		case RENT_E:
+			printw(RENT_FMTH, "N", "ID", "USERNAME", "BOOKID", "DUE DATE");
 			break;
 		default:
 			mvprintw(2, 1, "ERROR");

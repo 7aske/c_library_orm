@@ -85,7 +85,7 @@ class Struct:
 		for prop in self.members:
 			out += "\t"
 			if prop.proptype in [SqlType.VARCHAR, SqlType.DATE, SqlType.TEXT]:
-				out += "char {col}_buffer[BUFFER_SIZE];\n".format(col=prop.name)
+				out += "char {col}_buffer[{size}}];\n".format(col=prop.name, size=prop.size)
 			elif prop.proptype in [SqlType.LONG, SqlType.FK_LONG, SqlType.PK_LONG]:
 				out += "uint {col}_buffer;\n".format(col=prop.name)
 		return out

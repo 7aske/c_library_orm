@@ -12,8 +12,8 @@
 // #define SQL_DB   "library"
 // #define SQL_PORT 3306
 
-// static char* SQL_ADDR = "127.0.0.1";
-static char* SQL_ADDR = "192.168.1.202";
+static char* SQL_ADDR = "127.0.0.1";
+// static char* SQL_ADDR = "192.168.1.202";
 static char* SQL_USER = "nik";
 static char* SQL_PASS = "nik";
 static char* SQL_DB = "library";
