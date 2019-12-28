@@ -56,8 +56,8 @@ void mysql_bind_cleanup(MYSQL_BIND** bind) {
 
 void mysql_res_free(SQL_RESULT** res) {
 	assert(res != NULL);
-	SQL_RESULT_ROW* curr = NULL;
-	SQL_RESULT_ROW* prev = NULL;
+	SQL_RESULT_ROW* curr;
+	SQL_RESULT_ROW* prev;
 	if (*res != NULL) {
 		curr = (*res)->results;
 		while (curr != NULL) {
