@@ -8,20 +8,23 @@
 #define ADDRESS_FMTH       "%3s %4s %29.29s %10.10s %28.28s"
 #define ADDRESS_FMT        "%3d %4d %29.29s %10.10s %28.28s"
 
-#define AUTHOR_BOOK_FMTH   "%3s %4s %8.8s %8.8s %16.16s %13.13s"
-#define AUTHOR_BOOK_FMT    "%3d %4d %8.8s %8.8s %16.16s %13.13s"
+#define AUTHOR_BOOK_FMTH   "%3s %4s %14.14s %14.14s %-24.24s %14.14s"
+#define AUTHOR_BOOK_FMT    "%3d %4d %14.14s %14.14s %-24.24s %14.14s"
 
-#define AUTHOR_FMTH        "%3s %4s %8.8s %8.8s %51.51s"
-#define AUTHOR_FMT         "%3d %4d %8.8s %8.8s %51.51s"
+#define AUTHOR_FMTH        "%3s %4s %14.14s %14.14s %39.39s"
+#define AUTHOR_FMT         "%3d %4d %14.14s %14.14s %39.39s"
 
 #define BOOK_FMTH          "%3s %4s %-41.41s %14.14s %12.12s"
 #define BOOK_FMT           "%3d %4d %-41.41s %14.14s %12.12s"
 
-#define BOOK_SPECIMEN_FMTH "%3s %4s %32.32s %13.13s %10.10s %8.8s"
-#define BOOK_SPECIMEN_FMT  "%3d %4d %32.32s %13.13s %10.10s %8.8s"
+#define BOOK_SPECIMEN_FMTH "%3s %4s %-32.32s %13.13s %10.10s %11.11s"
+#define BOOK_SPECIMEN_FMT  "%3d %4d %-32.32s %13.13s %10.10s %11.11s"
 
-#define EMPLOYEE_FMTH      "%3s %4s %8.8s %8.8s %16.16s %8.8s"
-#define EMPLOYEE_FMT       "%3d %4d %8.8s %8.8s %16.16s %8.8s"
+#define EMPLOYEE_FMTH      "%3s %4s %14.14s %14.14s %20.20s %18.18s"
+#define EMPLOYEE_FMT       "%3d %4d %14.14s %14.14s %20.20s %18.18s"
+
+#define PERSON_FMTH        "%3s %4s %14.14s %14.14s %40.40s"
+#define PERSON_FMT         "%3d %4d %14.14s %14.14s %40.40s"
 
 #define LIBRARY_FMTH       "%3s %4s %26.26s %16.16s %8.8s %16.16s"
 #define LIBRARY_FMT        "%3d %4d %26.26s %16.16s %8.8s %16.16s"
@@ -29,14 +32,11 @@
 #define MUNICIPALITY_FMTH  "%3s %4s %34.34s %34.34s"
 #define MUNICIPALITY_FMT   "%3d %4d %34.34s %34.34s"
 
-#define PERSON_FMTH        "%3s %4s %27.27s %27.27s %13.14s"
-#define PERSON_FMT         "%3d %4d %27.27s %27.27s %13.14s"
+#define READER_FMTH        "%3s %4s %34.34s %34.34s"
+#define READER_FMT         "%3d %4d %34.34s %34.34s"
 
-#define READER_FMTH        "%3s %4s %16.16s %16.16s"
-#define READER_FMT         "%3d %4d %16.16s %16.16s"
-
-#define RENT_FMTH          "%3s %4s %16.16s %10.10s %10.10s"
-#define RENT_FMT           "%3d %4d %16.16s %10.10s %10.10s"
+#define RENT_FMTH          "%3s %4s %16.16s %10.10s %-30.30s %10.10s"
+#define RENT_FMT           "%3d %4d %16.16s %10.10s %-30.30s %10.10s"
 
 #define REGION_FMTH        "%3s %4s %69.69s"
 #define REGION_FMT         "%3d %4d %69.69s"
@@ -51,7 +51,7 @@ int handle_input(state_t* state);
 
 void change_list(state_t* state, int inc);
 
-char* _fmt_date(struct tm* ts){
+char* _fmt_date(struct tm* ts) {
 	#define DATE_FMT "%02d-%02d-%04d"
 	static char fmt[11];
 	sprintf(fmt, DATE_FMT, ts->tm_mday, ts->tm_mon, ts->tm_year);
@@ -78,13 +78,12 @@ int main() {
 	state.list_types[1] = MUNICIPALITY_E;
 	state.list_types[2] = ADDRESS_E;
 	state.list_types[3] = LIBRARY_E;
-
-	state.list_types[4] = AUTHOR_E;
-	state.list_types[5] = AUTHOR_BOOK_E;
-	state.list_types[6] = BOOK_E;
-	state.list_types[7] = BOOK_SPECIMEN_E;
-	state.list_types[8] = EMPLOYEE_E;
-	state.list_types[9] = PERSON_E;
+	state.list_types[4] = EMPLOYEE_E;
+	state.list_types[5] = PERSON_E;
+	state.list_types[6] = AUTHOR_E;
+	state.list_types[7] = AUTHOR_BOOK_E;
+	state.list_types[8] = BOOK_E;
+	state.list_types[9] = BOOK_SPECIMEN_E;
 	state.list_types[10] = READER_E;
 	state.list_types[11] = RENT_E;
 
@@ -117,7 +116,7 @@ void print_list(state_t* state) {
 	int offset;
 	if (state->curr_sel_idx > APP_ROW / 2) {
 		if (state->curr_sel_idx > state->curr_list->count - APP_ROW / 2 - 1) {
-			offset = (int)state->curr_list->count - APP_ROW + USED_LINES;
+			offset = (int) state->curr_list->count - APP_ROW + USED_LINES;
 		} else {
 			offset = state->curr_sel_idx - APP_ROW / 2 - 1;
 		}
@@ -212,13 +211,15 @@ void print_list(state_t* state) {
 					printw(READER_FMT, curr_idx + 1,
 						   ((READER*) curr->data)->id_reader,
 						   ((READER*) curr->data)->username,
-						   ((READER*) curr->data)->password);
+						   // ((READER*) curr->data)->password);
+						   "******************");
 					break;
 				case RENT_E:
 					printw(RENT_FMT, curr_idx + 1,
 						   ((RENT*) curr->data)->id_rent,
 						   ((RENT*) curr->data)->reader->username,
 						   ((RENT*) curr->data)->book_specimen->book_serial,
+						   ((RENT*) curr->data)->book_specimen->book->name,
 						   _fmt_date(&((RENT*) curr->data)->due_date));
 					break;
 			}
@@ -243,7 +244,7 @@ void print_list(state_t* state) {
 		} else {
 			attron(COLOR_PAIR(3));
 		}
-		mvprintw(1, 1 + i * (APP_COL / len), "%s", list_type_str(state->list_types[i]));
+		mvprintw(1, 5 + i * (APP_COL / len), "%s", list_type_str(state->list_types[i]));
 		attroff(COLOR_PAIR(1));
 		attroff(COLOR_PAIR(3));
 	}
@@ -257,10 +258,10 @@ void print_list(state_t* state) {
 			printw(ADDRESS_FMTH, "N", "ID", "STREET", "NUMBER", "MUNICIPALITY");
 			break;
 		case AUTHOR_E:
-			printw(AUTHOR_FMTH, "N", "ID", "FNAME", "LNAME", "DESCRIPTION");
+			printw(AUTHOR_FMTH, "N", "ID", "FIRST NAME", "LAST NAME", "DESCRIPTION");
 			break;
 		case AUTHOR_BOOK_E:
-			printw(AUTHOR_BOOK_FMTH, "N", "ID", "AFNAME", "ALNAME", "BKNAME", "ISBN");
+			printw(AUTHOR_BOOK_FMTH, "N", "ID", "FIRST NAME", "LAST NAME", "BOOK NAME", "ISBN");
 			break;
 		case BOOK_E:
 			printw(BOOK_FMTH, "N", "ID", "BOOK NAME", "ISBN", "PUB DATE");
@@ -287,7 +288,7 @@ void print_list(state_t* state) {
 			printw(REGION_FMTH, "N", "ID", "NAME");
 			break;
 		case RENT_E:
-			printw(RENT_FMTH, "N", "ID", "USERNAME", "BOOKID", "DUE DATE");
+			printw(RENT_FMTH, "N", "ID", "USERNAME", "BOOKID", "BOOK NAME", "DUE DATE");
 			break;
 		default:
 			mvprintw(2, 1, "ERROR");
@@ -322,7 +323,7 @@ int handle_input(state_t* state) {
 			}
 			break;
 		case KEY_LEFT:
-			if (state->list_type > 0) {
+			if (state->list_type >= 0) {
 				change_list(state, -1);
 				state->curr_line_pos = 0;
 				state->curr_sel_idx = 0;

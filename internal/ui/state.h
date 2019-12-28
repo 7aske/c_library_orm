@@ -7,8 +7,8 @@
 
 #pragma once
 
-#define APP_COL 80
-#define APP_ROW 24
+static unsigned char APP_COL =  80;
+static unsigned char APP_ROW =  24;
 
 struct state {
 	int curr_sel_idx;
