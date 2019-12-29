@@ -203,23 +203,25 @@ void print_list_header(WINDOW* win, enum list_type type) {
 }
 
 void print_list_footer(WINDOW* win) {
+	int y, x;
+	getmaxyx(win, y, x);
 	init_pair(4, COLOR_BLACK, COLOR_BLUE);
-	wmove(win, APP_ROW - 2, 1);
+	wmove(win, y - 2, 1);
 	wattron(win, COLOR_PAIR(3));
 	for (int j = 0; j < 78; ++j) {
 		waddch(win, ' ');
 	}
-	mvwprintw(win, APP_ROW - 2, 2, "CREATE");
+	mvwprintw(win, y - 2, 2, "CREATE");
 	wattron(win, COLOR_PAIR(4));
-	mvwprintw(win, APP_ROW - 2, 8, "(c)");
+	mvwprintw(win, y - 2, 8, "(c)");
 	wattron(win, COLOR_PAIR(3));
-	mvwprintw(win, APP_ROW - 2, 12, "UPDATE");
+	mvwprintw(win, y - 2, 12, "UPDATE");
 	wattron(win, COLOR_PAIR(4));
-	mvwprintw(win, APP_ROW - 2, 18, "(a)");
+	mvwprintw(win, y - 2, 18, "(a)");
 	wattron(win, COLOR_PAIR(3));
-	mvwprintw(win, APP_ROW - 2, 22, "DELETE");
+	mvwprintw(win, y - 2, 22, "DELETE");
 	wattron(win, COLOR_PAIR(4));
-	mvwprintw(win, APP_ROW - 2, 28, "(d)");
+	mvwprintw(win, y - 2, 28, "(d)");
 	wattroff(win, COLOR_PAIR(4));
 	wattroff(win, COLOR_PAIR(3));
 }

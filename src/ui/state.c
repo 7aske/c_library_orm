@@ -62,10 +62,8 @@ state_t* append_form_ctx(state_t* state) {
 
 state_t* append_popup_ctx(state_t* state) {
 	#define PWIN state->parent->win
-	int wcol, wrow;
-	getmaxyx(PWIN, wrow, wcol);
 
-	state->win = newwin(wrow / 2, wcol / 2, wrow / 4, wcol / 4);
+	state->win = newwin(APP_ROW / 2, APP_COL / 2, LINES / 2 - APP_ROW / 4, COLS / 2 - APP_COL / 4);
 	keypad(state->win, TRUE);
 
 	state->ctx = POPUP_CTX;

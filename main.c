@@ -33,7 +33,7 @@ int main() {
 	noecho();
 	start_color();
 	keypad(stdscr, TRUE);
-	wresize(state.win, APP_ROW, APP_COL);
+	wresize(state.win, LINES > APP_ROW ? LINES : APP_ROW, COLS > APP_COL ? COLS : APP_COL);
 
 	while (running) {
 		display(&state);

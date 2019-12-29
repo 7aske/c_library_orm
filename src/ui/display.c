@@ -27,6 +27,7 @@ void display(state_t* state) {
 }
 
 void display_root(state_t* state) {
+	assert(state != NULL);
 	assert(state->win != NULL);
 	WINDOW* win = state->win;
 	mvwprintw(win, 3, 3, "Imagine some help text here.");
@@ -80,13 +81,13 @@ void display_list(state_t* state) {
 
 	for (k = start, row = HEAD_LINES + 1, col = 1; k < end; ++k, row++) {
 		wmove(win, row, col);
-		clrtoeol();
+		wclrtoeol(win);
 	}
 
 	for (k = start, row = HEAD_LINES + getbegy(win) + 1, col = getbegx(win) + 1; k < end && k < count; ++k, row++) {
 		curr = alist_get(state->ls.list, k);
 		wmove(win, row, col);
-		clrtoeol();
+		wclrtoeol(win);
 
 		if (state->ls.sel_idx == k) {
 			wattron(win, COLOR_PAIR(1));
@@ -96,7 +97,7 @@ void display_list(state_t* state) {
 	}
 
 	wmove(win, 1, 1);
-	clrtoeol();
+	wclrtoeol(win);
 	for (int j = 0; j < 79; ++j) {
 		wattron(win, COLOR_PAIR(3));
 		waddch(win, ' ');
@@ -115,7 +116,7 @@ void display_list(state_t* state) {
 		wattroff(win, COLOR_PAIR(3));
 	}
 	wmove(win, 2, 1);
-	clrtoeol();
+	wclrtoeol(win);
 
 	/*HEADER*/
 	wattron(win, COLOR_PAIR(2));
