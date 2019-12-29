@@ -5,31 +5,31 @@
 #include "ui/util.h"
 
 
-const char * list_type_str(ENTITY_TYPE type) {
+const char* list_type_str(list_type_e type) {
 	switch (type) {
-		case ADDRESS_E:
+		case ADDRESS_TYPE:
 			return "ADDR";
-		case AUTHOR_E:
+		case AUTHOR_TYPE:
 			return "ATHR";
-		case AUTHOR_BOOK_E:
+		case AUTHOR_BOOK_TYPE:
 			return "ATBK";
-		case BOOK_E:
+		case BOOK_TYPE:
 			return "BOOK";
-		case BOOK_SPECIMEN_E:
+		case BOOK_SPECIMEN_TYPE:
 			return "BKSP";
-		case EMPLOYEE_E:
+		case EMPLOYEE_TYPE:
 			return "EMPL";
-		case LIBRARY_E:
+		case LIBRARY_TYPE:
 			return "LIBR";
-		case MUNICIPALITY_E:
+		case MUNICIPALITY_TYPE:
 			return "MUNI";
-		case PERSON_E:
+		case PERSON_TYPE:
 			return "PERS";
-		case READER_E:
+		case READER_TYPE:
 			return "READ";
-		case REGION_E:
+		case REGION_TYPE:
 			return "REGI";
-		case RENT_E:
+		case RENT_TYPE:
 			return "RENT";
 	}
 }
@@ -58,7 +58,7 @@ void res_to_list(SQL_RESULT* res, alist_t* list) {
 	mysql_res_free_noref(&res);
 }
 
-void type_free(void* elem, ENTITY_TYPE list_type){
+void type_free(void* elem, list_type_e list_type) {
 	switch (list_type) {
 		case MUNICIPALITY_E:
 			municipality_free((MUNICIPALITY**) &elem);
@@ -95,6 +95,41 @@ void type_free(void* elem, ENTITY_TYPE list_type){
 			break;
 		case RENT_E:
 			rent_free((RENT**) &elem);
+			break;
+	}
+}
+
+void type_free_ref(void* elem, list_type_e list_type) {
+	switch (list_type) {
+		case MUNICIPALITY_E:
+			region_free(&((MUNICIPALITY*) elem)->region);
+			break;
+		case ADDRESS_E:
+			municipality_free(&((ADDRESS*) elem)->municipality);
+			break;
+		case LIBRARY_E:
+			address_free(&((LIBRARY*) elem)->address);
+			break;
+		case AUTHOR_E:
+			person_free(&((AUTHOR*) elem)->person);
+			break;
+		case AUTHOR_BOOK_E:
+			book_free(&((AUTHOR_BOOK*) elem)->book);
+			author_free(&((AUTHOR_BOOK*) elem)->author);
+			break;
+		case BOOK_SPECIMEN_E:
+			book_free(&((BOOK_SPECIMEN*) elem)->book);
+			library_free(&((BOOK_SPECIMEN*) elem)->library);
+			break;
+		case EMPLOYEE_E:
+			library_free(&((EMPLOYEE*) elem)->library);
+			person_free(&((EMPLOYEE*) elem)->person);
+			break;
+		case RENT_E:
+			book_specimen_free(&((RENT*) elem)->book_specimen);
+			reader_free(&((RENT*) elem)->reader);
+			break;
+		default:
 			break;
 	}
 }

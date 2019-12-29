@@ -11,6 +11,7 @@
 
 #include "ui/state.h"
 #include "ui/format.h"
+#include "ui/util.h"
 
 void print_list(state_t* state);
 

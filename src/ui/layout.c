@@ -9,7 +9,7 @@ void change_list(state_t* state, int inc) {
 	if (state->curr_list != NULL) {
 		for (int i = 0; i < alist_size(state->curr_list); ++i) {
 			elem = alist_get(state->curr_list, i);
-			type_free(elem, state->list_type);
+			type_free_ref(elem, state->list_type);
 		}
 		alist_destroy(&state->curr_list);
 	}
