@@ -32,75 +32,14 @@ void display_root(state_t* state) {
 }
 
 void display_popup(state_t* state) {
+	assert(state->win != NULL);
+	WINDOW* win;
 
+	win = state->win;
 }
 
 void display_form(state_t* state) {
 
-}
-
-
-void change_list(state_t* state, int inc) {
-	if (state->ls.list != NULL) {
-		list_free_noref(&state->ls.list, state->ls.type);
-	}
-
-	if (state->ls.type == list_types[0] && inc == -1) {
-		state->ls.type = ETYPE_LEN - 1;
-	} else {
-		state->ls.type = (state->ls.type + inc) % ETYPE_LEN;
-	}
-
-	switch (state->ls.type) {
-		case MUNICIPALITY_TYPE:
-			state->ls.list = alist_new(sizeof(MUNICIPALITY));
-			res_to_list(municipality_find_all(), state->ls.list);
-			break;
-		case ADDRESS_TYPE:
-			state->ls.list = alist_new(sizeof(ADDRESS));
-			res_to_list(address_find_all(), state->ls.list);
-			break;
-		case REGION_TYPE:
-			state->ls.list = alist_new(sizeof(REGION));
-			res_to_list(region_find_all(), state->ls.list);
-			break;
-		case LIBRARY_TYPE:
-			state->ls.list = alist_new(sizeof(LIBRARY));
-			res_to_list(library_find_all(), state->ls.list);
-			break;
-		case AUTHOR_TYPE:
-			state->ls.list = alist_new(sizeof(AUTHOR));
-			res_to_list(author_find_all(), state->ls.list);
-			break;
-		case AUTHOR_BOOK_TYPE:
-			state->ls.list = alist_new(sizeof(AUTHOR_BOOK));
-			res_to_list(author_book_find_all(), state->ls.list);
-			break;
-		case BOOK_TYPE:
-			state->ls.list = alist_new(sizeof(BOOK));
-			res_to_list(book_find_all(), state->ls.list);
-			break;
-		case BOOK_SPECIMEN_TYPE:
-			state->ls.list = alist_new(sizeof(BOOK_SPECIMEN));
-			res_to_list(book_specimen_find_all(), state->ls.list);
-			break;
-		case EMPLOYEE_TYPE:
-			state->ls.list = alist_new(sizeof(EMPLOYEE));
-			res_to_list(employee_find_all(), state->ls.list);
-			break;
-		case PERSON_TYPE:
-			state->ls.list = alist_new(sizeof(PERSON));
-			res_to_list(person_find_all(), state->ls.list);
-			break;
-		case READER_TYPE:
-			state->ls.list = alist_new(sizeof(READER));
-			res_to_list(reader_find_all(), state->ls.list);
-			break;
-		case RENT_TYPE:
-			state->ls.list = alist_new(sizeof(RENT));
-			res_to_list(rent_find_all(), state->ls.list);
-			break;
-	}
 }
 
 void display_list(state_t* state) {
@@ -302,6 +241,70 @@ void display_list(state_t* state) {
 	print_footer(state);
 	wmove(win, 0, 0);
 	#undef HEAD_LINES
+}
+
+
+void change_list(state_t* state, int inc) {
+	if (state->ls.list != NULL) {
+		list_free_noref(&state->ls.list, state->ls.type);
+	}
+
+	if (state->ls.type == list_types[0] && inc == -1) {
+		state->ls.type = ETYPE_LEN - 1;
+	} else {
+		state->ls.type = (state->ls.type + inc) % ETYPE_LEN;
+	}
+
+	switch (state->ls.type) {
+		case MUNICIPALITY_TYPE:
+			state->ls.list = alist_new(sizeof(MUNICIPALITY));
+			res_to_list(municipality_find_all(), state->ls.list);
+			break;
+		case ADDRESS_TYPE:
+			state->ls.list = alist_new(sizeof(ADDRESS));
+			res_to_list(address_find_all(), state->ls.list);
+			break;
+		case REGION_TYPE:
+			state->ls.list = alist_new(sizeof(REGION));
+			res_to_list(region_find_all(), state->ls.list);
+			break;
+		case LIBRARY_TYPE:
+			state->ls.list = alist_new(sizeof(LIBRARY));
+			res_to_list(library_find_all(), state->ls.list);
+			break;
+		case AUTHOR_TYPE:
+			state->ls.list = alist_new(sizeof(AUTHOR));
+			res_to_list(author_find_all(), state->ls.list);
+			break;
+		case AUTHOR_BOOK_TYPE:
+			state->ls.list = alist_new(sizeof(AUTHOR_BOOK));
+			res_to_list(author_book_find_all(), state->ls.list);
+			break;
+		case BOOK_TYPE:
+			state->ls.list = alist_new(sizeof(BOOK));
+			res_to_list(book_find_all(), state->ls.list);
+			break;
+		case BOOK_SPECIMEN_TYPE:
+			state->ls.list = alist_new(sizeof(BOOK_SPECIMEN));
+			res_to_list(book_specimen_find_all(), state->ls.list);
+			break;
+		case EMPLOYEE_TYPE:
+			state->ls.list = alist_new(sizeof(EMPLOYEE));
+			res_to_list(employee_find_all(), state->ls.list);
+			break;
+		case PERSON_TYPE:
+			state->ls.list = alist_new(sizeof(PERSON));
+			res_to_list(person_find_all(), state->ls.list);
+			break;
+		case READER_TYPE:
+			state->ls.list = alist_new(sizeof(READER));
+			res_to_list(reader_find_all(), state->ls.list);
+			break;
+		case RENT_TYPE:
+			state->ls.list = alist_new(sizeof(RENT));
+			res_to_list(rent_find_all(), state->ls.list);
+			break;
+	}
 }
 
 void print_footer(state_t* state) {

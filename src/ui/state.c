@@ -38,6 +38,11 @@ void delete_state_ctx(state_t* state) {
 }
 
 state_t* append_list_ctx(state_t* state) {
+	int wrow, wcol;
+	getmaxyx(state->win, wrow, wcol);
+
+	state->win = newwin(wrow, wcol, 0, 0);
+	keypad(state->win, TRUE);
 
 	state->ctx = LIST_CTX;
 	state->ls.type = REGION_TYPE;
@@ -49,6 +54,8 @@ state_t* append_list_ctx(state_t* state) {
 }
 
 state_t* append_form_ctx(state_t* state) {
+	int wcol, wrow;
+	getmaxyx(state->win, wcol, wrow);
 	return NULL;
 }
 
@@ -57,18 +64,15 @@ state_t* append_popup_ctx(state_t* state) {
 }
 
 state_t* create_state_ctx(state_t* parent, ctx_e ctx) {
+	assert(parent->win != NULL);
 	#define BUF_LEN 16
 	char buf[BUF_LEN];
-	int row, col;
-	getmaxyx(parent->win, row, col);
 
 	state_t* newstate = calloc(1, sizeof(state_t));
 
 	snprintf(buf, BUF_LEN, "WINDOW %02d", ++window_count);
 	strncpy(newstate->title, buf, BUF_LEN);
 
-	newstate->win = newwin(row, col, 0, 0);
-	keypad(newstate->win, TRUE);
 
 	newstate->ctx = WINDOW_CTX;
 	newstate->child = NULL;
