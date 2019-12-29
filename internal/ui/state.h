@@ -102,8 +102,14 @@ typedef enum list_type list_type_e;
 
 void init_state(state_t* state);
 
-void delete_win(state_t* state);
+void delete_state_ctx(state_t* state);
 
-state_t* create_win(state_t* parent, ctx_e ctx);
+state_t* create_state_ctx(state_t* parent, ctx_e ctx);
+
+state_t* append_list_ctx(state_t* state);
+
+state_t* append_form_ctx(state_t* state);
+
+state_t* append_popup_ctx(state_t* state);
 
 #endif //IT350_PZ_APP_STATE_H

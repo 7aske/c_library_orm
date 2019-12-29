@@ -10,7 +10,7 @@ void root_ctx_handler(state_t* state, int input, volatile int* running) {
 			*running = false;
 			break;
 		case 'l':
-			state->child = create_win(state, LIST_CTX);
+			state->child = create_state_ctx(state, LIST_CTX);
 			change_list(state->child, 0);
 			break;
 	}
@@ -19,7 +19,7 @@ void root_ctx_handler(state_t* state, int input, volatile int* running) {
 void list_ctx_handler(state_t* state, int input) {
 	switch (input) {
 		case 'q':
-			delete_win(state);
+			delete_state_ctx(state);
 			break;
 		case KEY_UP:
 			if (state->ls.line_pos - 1 > 0) {
@@ -54,7 +54,7 @@ void list_ctx_handler(state_t* state, int input) {
 			clear();
 			break;
 		case 'l':
-			state->child = create_win(state, LIST_CTX);
+			state->child = create_state_ctx(state, LIST_CTX);
 			change_list(state->child, 0);
 			break;
 		default:
