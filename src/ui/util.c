@@ -7,14 +7,14 @@
 
 void list_free_noref(alist_t** list, list_type_e type) {
 	assert(list != NULL);
-	assert(*list != NULL);
-	void* elem;
-	for (int i = 0; i < alist_size(*list); ++i) {
-		elem = alist_get(*list, i);
-		type_free_ref(elem, type);
+	if (*list != NULL) {
+		void* elem;
+		for (int i = 0; i < alist_size(*list); ++i) {
+			elem = alist_get(*list, i);
+			type_free_ref(elem, type);
+		}
+		alist_destroy(list);
 	}
-	alist_destroy(list);
-
 }
 
 const char* list_type_str(list_type_e type) {

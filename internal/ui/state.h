@@ -12,8 +12,11 @@
 #include "structs/arraylist.h"
 #include "db/dbc.h"
 
-static unsigned char APP_COL = 80;
-static unsigned char APP_ROW = 24;
+
+static unsigned short APP_COL = 80;
+static unsigned short APP_ROW = 24;
+
+static short window_count = 0;
 
 #define ETYPE_LEN 12
 
@@ -54,6 +57,7 @@ enum context {
 };
 
 struct state {
+	char title[16];
 	WINDOW* win;
 	int curr_sel_idx;
 	int curr_line_pos;
@@ -69,8 +73,12 @@ typedef enum context ctx_e;
 
 typedef enum list_type list_type_e;
 
+#include "ui/util.h"
+
 void init_state(state_t* state, ctx_e ctx);
 
-state_t* create_popup(state_t* state);
+void delete_win(state_t* state, state_t* par, WINDOW* win);
+
+state_t* create_win(state_t* state);
 
 #endif //IT350_PZ_APP_STATE_H
