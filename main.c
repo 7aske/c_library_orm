@@ -4,7 +4,7 @@
 
 #include "db/dbc.h"
 #include "ui/state.h"
-#include "ui/layout.h"
+#include "ui/display.h"
 #include "ui/input.h"
 
 volatile static int running = true;

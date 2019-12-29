@@ -1,18 +1,42 @@
 //
 // Created by nik on 12/29/19.
 //
-#include "ui/layout.h"
+#include "ui/display.h"
 
 void display(state_t* state) {
-	if (state->ctx == ROOT_CTX){
-	} else {
-		print_list(state);
+	switch (state->ctx) {
+		case ROOT_CTX:
+			display_root(state);
+			break;
+		case WINDOW_CTX:
+			break;
+		case FORM_CTX:
+			break;
+		case POPUP_CTX:
+			break;
+		case LIST_CTX:
+			display_list(state);
+			break;
 	}
 	DBORDER(state->win)
 	mvwprintw(state->win, 0, 3, "%s", state->title);
 	if (state->child != NULL) {
 		display(state->child);
 	}
+}
+
+void display_root(state_t* state) {
+	assert(state->win != NULL);
+	WINDOW* win = state->win;
+	mvwprintw(win, 3, 3, "Imagine some help text here.");
+}
+
+void display_popup(state_t* state) {
+
+}
+
+void display_form(state_t* state) {
+
 }
 
 
@@ -79,7 +103,7 @@ void change_list(state_t* state, int inc) {
 	}
 }
 
-void print_list(state_t* state) {
+void display_list(state_t* state) {
 	if (state->ls.list == NULL || state->ctx != LIST_CTX) {
 		return;
 	}

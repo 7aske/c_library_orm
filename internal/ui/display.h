@@ -2,8 +2,8 @@
 // Created by nik on 12/29/19.
 //
 
-#ifndef IT350_PZ_APP_LAYOUT_H
-#define IT350_PZ_APP_LAYOUT_H
+#ifndef IT350_PZ_APP_DISPLAY_H
+#define IT350_PZ_APP_DISPLAY_H
 
 #pragma once
 
@@ -13,7 +13,6 @@
 #include "ui/format.h"
 #include "ui/util.h"
 
-void print_list(state_t* state);
 
 void change_list(state_t* state, int inc);
 
@@ -21,4 +20,12 @@ void print_footer(state_t* state);
 
 void display(state_t* state);
 
-#endif //IT350_PZ_APP_LAYOUT_H
+void display_list(state_t* state);
+
+void display_root(state_t* state);
+
+void display_popup(state_t* state);
+
+void display_form(state_t* state);
+
+#endif //IT350_PZ_APP_DISPLAY_H

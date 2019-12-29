@@ -8,7 +8,7 @@
 #pragma once
 
 #include "ui/state.h"
-#include "ui/layout.h"
+#include "ui/display.h"
 
 void root_ctx_handler(state_t* state, int input, volatile int* running);
 
