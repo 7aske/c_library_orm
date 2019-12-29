@@ -51,20 +51,45 @@ static const enum list_type list_types[ETYPE_LEN] = {
 };
 
 enum context {
-	ROOT_CTX,
-	WINDOW_CTX,
-	POPUP_CTX
+	ROOT_CTX = 0,
+	WINDOW_CTX = 1,
+	LIST_CTX = 2,
+	FORM_CTX = 3,
+	POPUP_CTX = 4
+};
+
+enum payload {
+	NONE_PLOAD,
+	FORM_PLOAD,
+	POPUP_PLOAD
+};
+
+struct list_state {
+	int sel_idx;
+	int line_pos;
+	alist_t* list;
+	enum list_type type;
+};
+
+struct popup_state {
+	char question[16];
+	unsigned short answer;
 };
 
 struct state {
 	char title[16];
 	WINDOW* win;
-	int curr_sel_idx;
-	int curr_line_pos;
-	alist_t* curr_list;
-	enum list_type list_type;
 	enum context ctx;
+
+	union {
+		struct list_state ls;
+		struct popup_state ps;
+	};
+	struct state* parent;
 	struct state* child;
+
+	void* payload;
+	enum payload ptype;
 };
 
 typedef struct state state_t;
@@ -75,10 +100,10 @@ typedef enum list_type list_type_e;
 
 #include "ui/util.h"
 
-void init_state(state_t* state, ctx_e ctx);
+void init_state(state_t* state);
 
-void delete_win(state_t* state, state_t* par, WINDOW* win);
+void delete_win(state_t* state);
 
-state_t* create_win(state_t* state);
+state_t* create_win(state_t* parent, ctx_e ctx);
 
 #endif //IT350_PZ_APP_STATE_H

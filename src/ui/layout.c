@@ -4,7 +4,10 @@
 #include "ui/layout.h"
 
 void display(state_t* state) {
-	print_list(state);
+	if (state->ctx == ROOT_CTX){
+	} else {
+		print_list(state);
+	}
 	DBORDER(state->win)
 	mvwprintw(state->win, 0, 3, "%s", state->title);
 	if (state->child != NULL) {
@@ -14,70 +17,70 @@ void display(state_t* state) {
 
 
 void change_list(state_t* state, int inc) {
-	if (state->curr_list != NULL) {
-		list_free_noref(&state->curr_list, state->list_type);
+	if (state->ls.list != NULL) {
+		list_free_noref(&state->ls.list, state->ls.type);
 	}
 
-	if (state->list_type == list_types[0] && inc == -1) {
-		state->list_type = ETYPE_LEN - 1;
+	if (state->ls.type == list_types[0] && inc == -1) {
+		state->ls.type = ETYPE_LEN - 1;
 	} else {
-		state->list_type = (state->list_type + inc) % ETYPE_LEN;
+		state->ls.type = (state->ls.type + inc) % ETYPE_LEN;
 	}
 
-	switch (state->list_type) {
+	switch (state->ls.type) {
 		case MUNICIPALITY_TYPE:
-			state->curr_list = alist_new(sizeof(MUNICIPALITY));
-			res_to_list(municipality_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(MUNICIPALITY));
+			res_to_list(municipality_find_all(), state->ls.list);
 			break;
 		case ADDRESS_TYPE:
-			state->curr_list = alist_new(sizeof(ADDRESS));
-			res_to_list(address_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(ADDRESS));
+			res_to_list(address_find_all(), state->ls.list);
 			break;
 		case REGION_TYPE:
-			state->curr_list = alist_new(sizeof(REGION));
-			res_to_list(region_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(REGION));
+			res_to_list(region_find_all(), state->ls.list);
 			break;
 		case LIBRARY_TYPE:
-			state->curr_list = alist_new(sizeof(LIBRARY));
-			res_to_list(library_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(LIBRARY));
+			res_to_list(library_find_all(), state->ls.list);
 			break;
 		case AUTHOR_TYPE:
-			state->curr_list = alist_new(sizeof(AUTHOR));
-			res_to_list(author_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(AUTHOR));
+			res_to_list(author_find_all(), state->ls.list);
 			break;
 		case AUTHOR_BOOK_TYPE:
-			state->curr_list = alist_new(sizeof(AUTHOR_BOOK));
-			res_to_list(author_book_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(AUTHOR_BOOK));
+			res_to_list(author_book_find_all(), state->ls.list);
 			break;
 		case BOOK_TYPE:
-			state->curr_list = alist_new(sizeof(BOOK));
-			res_to_list(book_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(BOOK));
+			res_to_list(book_find_all(), state->ls.list);
 			break;
 		case BOOK_SPECIMEN_TYPE:
-			state->curr_list = alist_new(sizeof(BOOK_SPECIMEN));
-			res_to_list(book_specimen_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(BOOK_SPECIMEN));
+			res_to_list(book_specimen_find_all(), state->ls.list);
 			break;
 		case EMPLOYEE_TYPE:
-			state->curr_list = alist_new(sizeof(EMPLOYEE));
-			res_to_list(employee_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(EMPLOYEE));
+			res_to_list(employee_find_all(), state->ls.list);
 			break;
 		case PERSON_TYPE:
-			state->curr_list = alist_new(sizeof(PERSON));
-			res_to_list(person_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(PERSON));
+			res_to_list(person_find_all(), state->ls.list);
 			break;
 		case READER_TYPE:
-			state->curr_list = alist_new(sizeof(READER));
-			res_to_list(reader_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(READER));
+			res_to_list(reader_find_all(), state->ls.list);
 			break;
 		case RENT_TYPE:
-			state->curr_list = alist_new(sizeof(RENT));
-			res_to_list(rent_find_all(), state->curr_list);
+			state->ls.list = alist_new(sizeof(RENT));
+			res_to_list(rent_find_all(), state->ls.list);
 			break;
 	}
 }
 
 void print_list(state_t* state) {
-	if (state->curr_list == NULL) {
+	if (state->ls.list == NULL || state->ctx != LIST_CTX) {
 		return;
 	}
 	int wrows, wcols;
@@ -93,12 +96,12 @@ void print_list(state_t* state) {
 	init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
 	init_pair(3, COLOR_WHITE, COLOR_GREEN);
 	int col, row, k;
-	int count = alist_size(state->curr_list);
+	int count = alist_size(state->ls.list);
 
 	WINDOW* win = state->win;
 
 	void* curr;
-	int start = state->curr_sel_idx / PER_SCR * PER_SCR;
+	int start = state->ls.sel_idx / PER_SCR * PER_SCR;
 	int end = start + PER_SCR;
 
 	for (k = start, row = HEAD_LINES + 1, col = 1; k < end; ++k, row++) {
@@ -107,15 +110,15 @@ void print_list(state_t* state) {
 	}
 
 	for (k = start, row = HEAD_LINES + getbegy(win) + 1, col = getbegx(win) + 1; k < end && k < count; ++k, row++) {
-		curr = alist_get(state->curr_list, k);
+		curr = alist_get(state->ls.list, k);
 		wmove(win, row, col);
 		clrtoeol();
 
-		if (state->curr_sel_idx == k) {
+		if (state->ls.sel_idx == k) {
 			wattron(win, COLOR_PAIR(1));
 		}
 
-		switch (state->list_type) {
+		switch (state->ls.type) {
 			case MUNICIPALITY_TYPE:
 				mvwprintw(win, row, col, MUNICIPALITY_FMT, k + 1,
 						  ((MUNICIPALITY*) curr)->id_municipality,
@@ -216,7 +219,7 @@ void print_list(state_t* state) {
 
 	/*HEADER*/
 	for (int i = 0; i < ETYPE_LEN; ++i) {
-		if (i == state->list_type) {
+		if (i == state->ls.type) {
 			wattron(win, COLOR_PAIR(1));
 		} else {
 			wattron(win, COLOR_PAIR(3));
@@ -230,7 +233,7 @@ void print_list(state_t* state) {
 
 	/*HEADER*/
 	wattron(win, COLOR_PAIR(2));
-	switch (state->list_type) {
+	switch (state->ls.type) {
 		case ADDRESS_TYPE:
 			mvwprintw(win, 2, 1, ADDRESS_FMTH, "N", "ID", "STREET", "NUMBER", "MUNICIPALITY");
 			break;
