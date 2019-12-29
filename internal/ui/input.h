@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ui/state.h"
+#include "ui/views/popup.h"
 #include "ui/display.h"
 
 void root_ctx_handler(state_t* state, int input, volatile int* running);
@@ -15,5 +16,7 @@ void root_ctx_handler(state_t* state, int input, volatile int* running);
 void list_ctx_handler(state_t* state, int input);
 
 void form_ctx_handler(state_t* state, int input);
+
+void popup_ctx_handler(state_t* state, int input);
 
 #endif //IT350_PZ_APP_INPUT_H

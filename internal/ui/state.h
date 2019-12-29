@@ -20,6 +20,8 @@ static short window_count = 0;
 
 #define ETYPE_LEN 12
 
+#define POPUP_QSIZE 128
+
 enum list_type {
 	REGION_TYPE = 0,
 	MUNICIPALITY_TYPE = 1,
@@ -72,8 +74,12 @@ struct list_state {
 };
 
 struct popup_state {
-	char question[16];
-	unsigned short answer;
+	char ques[POPUP_QSIZE];
+	unsigned short ans;
+
+	void* arg;
+
+	int (* action)(void* arg);
 };
 
 struct state {

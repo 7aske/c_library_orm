@@ -145,3 +145,96 @@ void type_free_ref(void* elem, list_type_e list_type) {
 			break;
 	}
 }
+
+int (* type_delete_action(enum list_type type))(void* arg) {
+	switch (type) {
+		case REGION_TYPE:
+			return (int (*)(void*)) region_delete;
+		case MUNICIPALITY_TYPE:
+			return (int (*)(void*)) municipality_delete;
+		case ADDRESS_TYPE:
+			return (int (*)(void*)) address_delete;
+		case LIBRARY_TYPE:
+			return (int (*)(void*)) library_delete;
+		case EMPLOYEE_TYPE:
+			return (int (*)(void*)) employee_delete;
+		case PERSON_TYPE:
+			return (int (*)(void*)) person_delete;
+		case AUTHOR_TYPE:
+			return (int (*)(void*)) author_delete;
+		case AUTHOR_BOOK_TYPE:
+			return (int (*)(void*)) author_book_delete;
+		case BOOK_TYPE:
+			return (int (*)(void*)) book_delete;
+		case BOOK_SPECIMEN_TYPE:
+			return (int (*)(void*)) book_specimen_delete;
+		case READER_TYPE:
+			return (int (*)(void*)) reader_delete;
+		case RENT_TYPE:
+			return (int (*)(void*)) rent_delete;
+		default:
+			return NULL;
+	}
+}
+
+int (* type_update_action(enum list_type type))(void* arg) {
+	switch (type) {
+		case REGION_TYPE:
+			return (int (*)(void*)) region_update;
+		case MUNICIPALITY_TYPE:
+			return (int (*)(void*)) municipality_update;
+		case ADDRESS_TYPE:
+			return (int (*)(void*)) address_update;
+		case LIBRARY_TYPE:
+			return (int (*)(void*)) library_update;
+		case EMPLOYEE_TYPE:
+			return (int (*)(void*)) employee_update;
+		case PERSON_TYPE:
+			return (int (*)(void*)) person_update;
+		case AUTHOR_TYPE:
+			return (int (*)(void*)) author_update;
+		case AUTHOR_BOOK_TYPE:
+			return (int (*)(void*)) author_book_update;
+		case BOOK_TYPE:
+			return (int (*)(void*)) book_update;
+		case BOOK_SPECIMEN_TYPE:
+			return (int (*)(void*)) book_specimen_update;
+		case READER_TYPE:
+			return (int (*)(void*)) reader_update;
+		case RENT_TYPE:
+			return (int (*)(void*)) rent_update;
+		default:
+			return NULL;
+	}
+}
+
+int (* type_insert_action(enum list_type type))(void* arg) {
+	switch (type) {
+		case REGION_TYPE:
+			return (int (*)(void*)) region_insert;
+		case MUNICIPALITY_TYPE:
+			return (int (*)(void*)) municipality_insert;
+		case ADDRESS_TYPE:
+			return (int (*)(void*)) address_insert;
+		case LIBRARY_TYPE:
+			return (int (*)(void*)) library_insert;
+		case EMPLOYEE_TYPE:
+			return (int (*)(void*)) employee_insert;
+		case PERSON_TYPE:
+			return (int (*)(void*)) person_insert;
+		case AUTHOR_TYPE:
+			return (int (*)(void*)) author_insert;
+		case AUTHOR_BOOK_TYPE:
+			return (int (*)(void*)) author_book_insert;
+		case BOOK_TYPE:
+			return (int (*)(void*)) book_insert;
+		case BOOK_SPECIMEN_TYPE:
+			return (int (*)(void*)) book_specimen_insert;
+		case READER_TYPE:
+			return (int (*)(void*)) reader_insert;
+		case RENT_TYPE:
+			return (int (*)(void*)) rent_insert;
+		default:
+			return NULL;
+	}
+}

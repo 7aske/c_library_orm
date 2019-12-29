@@ -13,6 +13,9 @@ void root_ctx_handler(state_t* state, int input, volatile int* running) {
 			state->child = create_state_ctx(state, LIST_CTX);
 			change_list(state->child, 0);
 			break;
+		case 'p':
+			state->child = create_state_ctx(state, POPUP_CTX);
+			break;
 	}
 }
 
@@ -43,7 +46,7 @@ void list_ctx_handler(state_t* state, int input) {
 				state->ls.line_pos = 0;
 				state->ls.sel_idx = 0;
 			}
-			clear();
+			wclear(state->win);
 			break;
 		case KEY_RIGHT:
 			if (state->ls.type < ETYPE_LEN) {
@@ -51,7 +54,13 @@ void list_ctx_handler(state_t* state, int input) {
 				state->ls.line_pos = 0;
 				state->ls.sel_idx = 0;
 			}
-			clear();
+			wclear(state->win);
+			break;
+		case 'd':
+			state->child = create_state_ctx(state, POPUP_CTX);
+			popup_set_question(state->child, "Are you sure you want to delete?");
+			state->child->ps.action = type_delete_action(state->ls.type);
+			state->child->ps.arg = alist_get(state->ls.list, state->ls.sel_idx);
 			break;
 		case 'l':
 			state->child = create_state_ctx(state, LIST_CTX);
@@ -64,4 +73,25 @@ void list_ctx_handler(state_t* state, int input) {
 
 void form_ctx_handler(state_t* state, int input) {
 
+}
+
+void popup_ctx_handler(state_t* state, int input) {
+	switch (input) {
+		case 'q':
+			delete_state_ctx(state);
+			break;
+		case 'y':
+			assert(state->parent != NULL);
+			state->parent->ptype = POPUP_PLOAD;
+			popup_action(state);
+			delete_state_ctx(state);
+			break;
+		case 'n':
+			assert(state->parent != NULL);
+			state->parent->ptype = POPUP_PLOAD;
+			// state->parent->payload = malloc(1);
+			// *(char*) state->parent->payload = 0;
+			delete_state_ctx(state);
+			break;
+	}
 }

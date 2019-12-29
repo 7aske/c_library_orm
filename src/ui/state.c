@@ -22,7 +22,7 @@ void delete_state_ctx(state_t* state) {
 		case WINDOW_CTX:
 			break;
 		case LIST_CTX:
-			if (state->ls.list)
+			if (state->ls.list != NULL)
 				list_free_noref(&state->ls.list, state->ls.type);
 			break;
 		case FORM_CTX:
@@ -38,8 +38,9 @@ void delete_state_ctx(state_t* state) {
 }
 
 state_t* append_list_ctx(state_t* state) {
+	#define PWIN state->parent->win
 	int wrow, wcol;
-	getmaxyx(state->win, wrow, wcol);
+	getmaxyx(PWIN, wrow, wcol);
 
 	state->win = newwin(wrow, wcol, 0, 0);
 	keypad(state->win, TRUE);
@@ -51,16 +52,29 @@ state_t* append_list_ctx(state_t* state) {
 	state->ls.sel_idx = 0;
 
 	return state;
+	#undef PWIN
 }
 
 state_t* append_form_ctx(state_t* state) {
-	int wcol, wrow;
-	getmaxyx(state->win, wcol, wrow);
+
 	return NULL;
 }
 
 state_t* append_popup_ctx(state_t* state) {
-	return NULL;
+	#define PWIN state->parent->win
+	int wcol, wrow;
+	getmaxyx(PWIN, wrow, wcol);
+
+	state->win = newwin(wrow / 2, wcol / 2, wrow / 4, wcol / 4);
+	keypad(state->win, TRUE);
+
+	state->ctx = POPUP_CTX;
+	state->ps.action = NULL;
+	state->ps.arg = NULL;
+	state->ps.ques[0] = '\0';
+
+	return state;
+	#undef PWIN
 }
 
 state_t* create_state_ctx(state_t* parent, ctx_e ctx) {

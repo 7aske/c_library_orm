@@ -10,7 +10,7 @@
 volatile static int running = true;
 
 void abrtendwin(int signum) {
-	if (signum == SIGABRT) {
+	if (signum == SIGABRT || signum == SIGSEGV) {
 		endwin();
 		abort();
 	}
@@ -23,6 +23,7 @@ int main() {
 
 	atexit((void (*)(void)) endwin);
 	signal(SIGABRT, abrtendwin);
+	signal(SIGSEGV, abrtendwin);
 
 	state_t state;
 	init_state(&state);
@@ -64,12 +65,14 @@ int handle_input(state_t* state) {
 		case LIST_CTX:
 			list_ctx_handler(curr, input);
 			break;
+		case POPUP_CTX:
+			popup_ctx_handler(curr, input);
+			break;
 		case WINDOW_CTX:
 		case FORM_CTX:
-		case POPUP_CTX:
 			break;
+
 	}
 	wmove(win, 0, 0);
-
 }
 
