@@ -19,4 +19,6 @@ void change_list(state_t* state, int inc);
 
 void print_footer(state_t* state);
 
+void display(state_t* state);
+
 #endif //IT350_PZ_APP_LAYOUT_H

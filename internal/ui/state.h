@@ -48,6 +48,7 @@ static const enum list_type list_types[ETYPE_LEN] = {
 };
 
 enum context {
+	ROOT_CTX,
 	WINDOW_CTX,
 	POPUP_CTX
 };
@@ -68,6 +69,8 @@ typedef enum context ctx_e;
 
 typedef enum list_type list_type_e;
 
-void init_state(state_t* state);
+void init_state(state_t* state, ctx_e ctx);
+
+state_t* create_popup(state_t* state);
 
 #endif //IT350_PZ_APP_STATE_H

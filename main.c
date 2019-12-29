@@ -14,10 +14,12 @@ int main() {
 	system("env | grep -i TERM");
 
 	atexit((void (*)(void)) endwin);
+
 	state_t state;
-	init_state(&state);
+	init_state(&state, ROOT_CTX);
 
 	state.win = initscr();
+
 	cbreak();
 	noecho();
 	start_color();
@@ -28,10 +30,13 @@ int main() {
 	change_list(&state, 0);
 
 	while (running) {
-		print_list(&state);
-		DBORDER(state.win)
+		display(&state);
 		refresh();
 		handle_input(&state);
+
+		if (state.win == NULL) {
+			running = false;
+		}
 	}
 	void* elem;
 	for (int i = 0; i < alist_size(state.curr_list); ++i) {
@@ -43,51 +48,72 @@ int main() {
 	return 0;
 }
 
-void quit() {
-	running = false;
-}
-
-
 int handle_input(state_t* state) {
+	state_t* curr = state;
 	int input;
-	input = wgetch(state->win);
 
-	if (state->ctx == WINDOW_CTX) {
+	while (curr->child != NULL) {
+		curr = curr->child;
+	}
+
+	if (curr->ctx == ROOT_CTX) {
+		input = getch();
+	} else {
+		input = wgetch(curr->win);
+	}
+
+	if (curr->ctx == WINDOW_CTX || curr->ctx == ROOT_CTX) {
 		switch (input) {
 			case 'q':
-				quit();
+				delwin(curr->win);
+				curr->win = NULL;
+				if (curr->ctx != ROOT_CTX) {
+					if (curr->curr_list != NULL) {
+						void* elem;
+						for (int i = 0; i < alist_size(curr->curr_list); ++i) {
+							elem = alist_get(curr->curr_list, i);
+							type_free_ref(elem, curr->list_type);
+						}
+						alist_destroy(&curr->curr_list);
+					}
+				} else {
+					running = false;
+				}
 				break;
 			case KEY_UP:
-				if (state->curr_line_pos - 1 > 0) {
-					state->curr_line_pos--;
+				if (curr->curr_line_pos - 1 > 0) {
+					curr->curr_line_pos--;
 				}
-				if (state->curr_sel_idx > 0) {
-					state->curr_sel_idx--;
+				if (curr->curr_sel_idx > 0) {
+					curr->curr_sel_idx--;
 				}
 				break;
 			case KEY_DOWN:
-				if (state->curr_line_pos + 1 < APP_ROW - 2) {
-					state->curr_line_pos++;
+				if (curr->curr_line_pos + 1 < APP_ROW - 2) {
+					curr->curr_line_pos++;
 				}
-				if (state->curr_sel_idx < alist_size(state->curr_list) - 1) {
-					state->curr_sel_idx++;
+				if (curr->curr_sel_idx < alist_size(curr->curr_list) - 1) {
+					curr->curr_sel_idx++;
 				}
 				break;
 			case KEY_LEFT:
-				if (state->list_type >= 0) {
-					change_list(state, -1);
-					state->curr_line_pos = 0;
-					state->curr_sel_idx = 0;
+				if (curr->list_type >= 0) {
+					change_list(curr, -1);
+					curr->curr_line_pos = 0;
+					curr->curr_sel_idx = 0;
 				}
 				clear();
 				break;
 			case KEY_RIGHT:
-				if (state->list_type < ETYPE_LEN) {
-					change_list(state, 1);
-					state->curr_line_pos = 0;
-					state->curr_sel_idx = 0;
+				if (curr->list_type < ETYPE_LEN) {
+					change_list(curr, 1);
+					curr->curr_line_pos = 0;
+					curr->curr_sel_idx = 0;
 				}
 				clear();
+				break;
+			case 'l':
+				create_popup(curr);
 				break;
 			default:
 				break;
