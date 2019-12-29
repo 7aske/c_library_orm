@@ -39,6 +39,9 @@ extern void __attribute__((used))
 mysql_bind_cleanup(MYSQL_BIND** bind);
 
 extern void __attribute__((used))
+mysql_res_free_noref(SQL_RESULT** res);
+
+extern void __attribute__((used))
 mysql_res_free(SQL_RESULT** res);
 
 #endif //IT350_PZ_APP_DBC_H

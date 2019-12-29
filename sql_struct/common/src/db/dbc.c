@@ -53,3 +53,20 @@ void mysql_bind_cleanup(MYSQL_BIND** bind) {
 	assert(bind != NULL);
 	mysql_bind_free(*bind);
 }
+
+void mysql_res_free_noref(SQL_RESULT** res) {
+	assert(res != NULL);
+	SQL_RESULT_ROW* curr;
+	SQL_RESULT_ROW* prev;
+	if (*res != NULL) {
+		curr = (*res)->results;
+		while (curr != NULL) {
+			prev = curr;
+			curr = curr->next;
+			free(prev->data);
+			free(prev);
+		}
+		free(*res);
+		*res = NULL;
+	}
+}

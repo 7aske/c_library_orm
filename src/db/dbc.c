@@ -54,6 +54,23 @@ void mysql_bind_cleanup(MYSQL_BIND** bind) {
 	mysql_bind_free(*bind);
 }
 
+void mysql_res_free_noref(SQL_RESULT** res) {
+	assert(res != NULL);
+	SQL_RESULT_ROW* curr;
+	SQL_RESULT_ROW* prev;
+	if (*res != NULL) {
+		curr = (*res)->results;
+		while (curr != NULL) {
+			prev = curr;
+			curr = curr->next;
+			free(prev->data);
+			free(prev);
+		}
+		free(*res);
+		*res = NULL;
+	}
+} 
+
 void mysql_res_free(SQL_RESULT** res) {
 	assert(res != NULL);
 	SQL_RESULT_ROW* curr;
@@ -62,7 +79,7 @@ void mysql_res_free(SQL_RESULT** res) {
 
 	if (*res != NULL) {
 		switch((*res)->type){
-		
+
 			case ADDRESS_E:
 			free_func = (void (*)(void**)) address_free;
 			break;
@@ -103,7 +120,7 @@ void mysql_res_free(SQL_RESULT** res) {
 		curr = (*res)->results;
 		while (curr != NULL) {
 			assert(free_func != NULL);
-			
+
 			prev = curr;
 			curr = curr->next;
 			free_func(&prev->data);
@@ -113,5 +130,4 @@ void mysql_res_free(SQL_RESULT** res) {
 		*res = NULL;
 	}
 
-} 
-	
+}

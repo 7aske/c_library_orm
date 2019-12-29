@@ -38,7 +38,7 @@
 #define RENT_FMTH          "%3s|%4s|%16.16s|%10.10s|%-30.30s|%10.10s"
 #define RENT_FMT           "%3d|%4d|%16.16s|%10.10s|%-30.30s|%10.10s"
 
-#define REGION_FMTH        "%3s%4s|%69.69s"
-#define REGION_FMT         "%3d%4d|%69.69s"
+#define REGION_FMTH        "%3s|%4s|%69.69s"
+#define REGION_FMT         "%3d|%4d|%69.69s"
 
 #endif //IT350_PZ_APP_FORMAT_H
