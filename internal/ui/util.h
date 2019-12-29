@@ -24,4 +24,6 @@ void type_free(void* elem, list_type_e list_type);
 
 void type_free_ref(void* elem, list_type_e list_type);
 
+inline void list_free_noref(alist_t** list, list_type_e type);
+
 #endif //IT350_PZ_APP_UTIL_H

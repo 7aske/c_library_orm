@@ -5,6 +5,7 @@
 #include "db/dbc.h"
 #include "ui/state.h"
 #include "ui/layout.h"
+#include "ui/util.h"
 
 volatile static int running = true;
 
@@ -38,26 +39,23 @@ int main() {
 			running = false;
 		}
 	}
-	void* elem;
-	for (int i = 0; i < alist_size(state.curr_list); ++i) {
-		elem = alist_get(state.curr_list, i);
-		type_free_ref(elem, state.list_type);
-	}
-	alist_destroy(&state.curr_list);
+	list_free_noref(&state.curr_list, state.list_type);
 
 	return 0;
 }
 
 int handle_input(state_t* state) {
 	state_t* curr = state;
+	state_t* par = NULL;
 	int input;
 
 	while (curr->child != NULL) {
+		par = curr;
 		curr = curr->child;
 	}
 
 	if (curr->ctx == ROOT_CTX) {
-		input = getch();
+		input = wgetch(stdscr);
 	} else {
 		input = wgetch(curr->win);
 	}
@@ -69,15 +67,14 @@ int handle_input(state_t* state) {
 				curr->win = NULL;
 				if (curr->ctx != ROOT_CTX) {
 					if (curr->curr_list != NULL) {
-						void* elem;
-						for (int i = 0; i < alist_size(curr->curr_list); ++i) {
-							elem = alist_get(curr->curr_list, i);
-							type_free_ref(elem, curr->list_type);
-						}
-						alist_destroy(&curr->curr_list);
+						list_free_noref(&state->curr_list, state->list_type);
 					}
 				} else {
 					running = false;
+				}
+				if (par != NULL){
+					free(par->child);
+					par->child = NULL;
 				}
 				break;
 			case KEY_UP:
@@ -114,6 +111,7 @@ int handle_input(state_t* state) {
 				break;
 			case 'l':
 				create_popup(curr);
+				change_list(curr, 0);
 				break;
 			default:
 				break;
