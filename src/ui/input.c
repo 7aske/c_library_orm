@@ -2,6 +2,7 @@
 // Created by nik on 12/29/19.
 //
 
+#include <ui/forms/region_form.h>
 #include "ui/input.h"
 
 void root_ctx_handler(state_t* state, int input, volatile int* running) {
@@ -65,6 +66,13 @@ void list_ctx_handler(state_t* state, int input) {
 		case 'l':
 			state->child = create_state_ctx(state, LIST_CTX);
 			change_list(state->child, 0);
+			break;
+		case 'c':
+			state->child = create_state_ctx(state, FORM_CTX);
+			region_insert(&state->child->fs.region);
+			printw("\n\n%s\n\n", state->child->fs.region.name);
+			getch();
+			delete_state_ctx(state->child);
 			break;
 		default:
 			break;

@@ -4,7 +4,6 @@
 
 #include "ui/views/list.h"
 
-
 void change_list(state_t* state, int inc) {
 	if (state->ls.list != NULL) {
 		list_free_noref(&state->ls.list, state->ls.type);
@@ -208,7 +207,7 @@ void print_list_footer(WINDOW* win) {
 	init_pair(4, COLOR_BLACK, COLOR_BLUE);
 	wmove(win, y - 2, 1);
 	wattron(win, COLOR_PAIR(3));
-	for (int j = 0; j < 78; ++j) {
+	for (int j = 0; j < x - 1; ++j) {
 		waddch(win, ' ');
 	}
 	mvwprintw(win, y - 2, 2, "CREATE");

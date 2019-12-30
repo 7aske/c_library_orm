@@ -66,6 +66,12 @@ enum payload {
 	POPUP_PLOAD
 };
 
+typedef enum context ctx_e;
+
+typedef enum list_type list_type_e;
+
+typedef enum list_type form_type_e;
+
 struct list_state {
 	int sel_idx;
 	int line_pos;
@@ -82,6 +88,25 @@ struct popup_state {
 	int (* action)(void* arg);
 };
 
+struct form_state {
+	form_type_e type;
+
+	union {
+		REGION region;
+		MUNICIPALITY municipality;
+		ADDRESS address;
+		LIBRARY library;
+		EMPLOYEE employee;
+		PERSON person;
+		AUTHOR author;
+		AUTHOR_BOOK author_book;
+		BOOK book;
+		BOOK_SPECIMEN book_specimen;
+		READER reader;
+		RENT rent;
+	};
+};
+
 struct state {
 	char title[16];
 	WINDOW* win;
@@ -90,6 +115,7 @@ struct state {
 	union {
 		struct list_state ls;
 		struct popup_state ps;
+		struct form_state fs;
 	};
 	struct state* parent;
 	struct state* child;
@@ -99,10 +125,6 @@ struct state {
 };
 
 typedef struct state state_t;
-
-typedef enum context ctx_e;
-
-typedef enum list_type list_type_e;
 
 #include "ui/util.h"
 

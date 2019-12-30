@@ -11,6 +11,8 @@
 #include "ui/views/popup.h"
 #include "ui/display.h"
 
+#define ctrl(ch)           ((ch) & 0x1f)
+
 void root_ctx_handler(state_t* state, int input, volatile int* running);
 
 void list_ctx_handler(state_t* state, int input);

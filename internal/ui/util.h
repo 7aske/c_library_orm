@@ -14,6 +14,8 @@
 #include "ui/state.h"
 #include "structs/arraylist.h"
 
+char* trimws(char* strp);
+
 const char* list_type_str(list_type_e type);
 
 void res_to_list(SQL_RESULT* res, alist_t* list);

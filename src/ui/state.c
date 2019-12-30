@@ -1,5 +1,6 @@
 
 #include "ui/state.h"
+#include "ui/forms/region_form.h"
 
 void init_state(state_t* state) {
 	static const char* title = "APP";
@@ -56,8 +57,9 @@ state_t* append_list_ctx(state_t* state) {
 }
 
 state_t* append_form_ctx(state_t* state) {
-
-	return NULL;
+	state->ctx = FORM_CTX;
+	region_form_construct(state);
+	return state;
 }
 
 state_t* append_popup_ctx(state_t* state) {

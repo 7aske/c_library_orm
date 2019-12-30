@@ -98,7 +98,7 @@ void display_list(state_t* state) {
 
 	wmove(win, 1, 1);
 	wclrtoeol(win);
-	for (int j = 0; j < 79; ++j) {
+	for (int j = 0; j < wcols - 1; ++j) {
 		wattron(win, COLOR_PAIR(3));
 		waddch(win, ' ');
 		wattroff(win, COLOR_PAIR(3));

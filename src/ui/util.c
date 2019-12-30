@@ -4,6 +4,28 @@
 
 #include "ui/util.h"
 
+char* trimws(char* strp) {
+	char *end;
+
+	// trim leading space
+	while(isspace(*strp))
+		strp++;
+
+	if(*strp == 0) // all spaces?
+		return strp;
+
+	// trim trailing space
+	end = strp + strnlen(strp, 128) - 1;
+
+	while(end > strp && isspace(*end))
+		end--;
+
+	// write new null terminator
+	*(end+1) = '\0';
+
+	return strp;
+}
+
 
 void list_free_noref(alist_t** list, list_type_e type) {
 	assert(list != NULL);
