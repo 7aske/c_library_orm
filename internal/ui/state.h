@@ -90,21 +90,21 @@ struct popup_state {
 
 struct form_state {
 	form_type_e type;
-
-	union {
-		REGION region;
-		MUNICIPALITY municipality;
-		ADDRESS address;
-		LIBRARY library;
-		EMPLOYEE employee;
-		PERSON person;
-		AUTHOR author;
-		AUTHOR_BOOK author_book;
-		BOOK book;
-		BOOK_SPECIMEN book_specimen;
-		READER reader;
-		RENT rent;
-	};
+	void* data;
+	// union DATA {
+	// 	REGION* region;
+	// 	MUNICIPALITY* municipality;
+	// 	ADDRESS* address;
+	// 	LIBRARY* library;
+	// 	EMPLOYEE* employee;
+	// 	PERSON* person;
+	// 	AUTHOR* author;
+	// 	AUTHOR_BOOK* author_book;
+	// 	BOOK* book;
+	// 	BOOK_SPECIMEN* book_specimen;
+	// 	READER* reader;
+	// 	RENT* rent;
+	// } data;
 };
 
 struct state {
@@ -127,6 +127,7 @@ struct state {
 typedef struct state state_t;
 
 #include "ui/util.h"
+#include "ui/forms/region_form.h"
 
 void init_state(state_t* state);
 

@@ -2,7 +2,6 @@
 // Created by nik on 12/29/19.
 //
 
-#include <ui/forms/region_form.h>
 #include "ui/input.h"
 
 void root_ctx_handler(state_t* state, int input, volatile int* running) {
@@ -21,6 +20,7 @@ void root_ctx_handler(state_t* state, int input, volatile int* running) {
 }
 
 void list_ctx_handler(state_t* state, int input) {
+	int (*func)(void*);
 	switch (input) {
 		case 'q':
 			delete_state_ctx(state);
@@ -69,9 +69,10 @@ void list_ctx_handler(state_t* state, int input) {
 			break;
 		case 'c':
 			state->child = create_state_ctx(state, FORM_CTX);
-			region_insert(&state->child->fs.region);
-			printw("\n\n%s\n\n", state->child->fs.region.name);
-			getch();
+			if (type_get_id(state->child->fs.data, state->child->fs.type) == 0) {
+				func = type_insert_action(state->child->fs.type);
+				func(state->child->fs.data);
+			}
 			delete_state_ctx(state->child);
 			break;
 		default:

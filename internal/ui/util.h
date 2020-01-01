@@ -28,6 +28,8 @@ void type_free_ref(void* elem, list_type_e list_type);
 
 void list_free_noref(alist_t** list, list_type_e type);
 
+int type_get_id(void* elem, list_type_e list_type);
+
 
 int (* type_delete_action(enum list_type type))(void* arg);
 

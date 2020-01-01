@@ -10,6 +10,7 @@
 #include "ui/state.h"
 #include "ui/views/popup.h"
 #include "ui/display.h"
+#include "ui/forms/region_form.h"
 
 #define ctrl(ch)           ((ch) & 0x1f)
 

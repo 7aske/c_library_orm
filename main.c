@@ -7,8 +7,6 @@
 #include "ui/display.h"
 #include "ui/input.h"
 
-#include "ui/forms/region_form.h"
-
 volatile static int running = true;
 
 void abrtendwin(int signum) {

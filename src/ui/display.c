@@ -30,7 +30,9 @@ void display_root(state_t* state) {
 	assert(state != NULL);
 	assert(state->win != NULL);
 	WINDOW* win = state->win;
-	mvwprintw(win, 3, 3, "Imagine some help text here.");
+	mvwprintw(win, 3, 3, "Press 'L' to open up a new list.");
+	mvwprintw(win, 4, 3, "Press 'Q' to quit the program or exit the list view.");
+	mvwprintw(win, 5, 3, "Use arrow keys to navigate and switch tabs.");
 	if (state->payload != NULL) {
 		switch (state->ptype) {
 			case POPUP_PLOAD:

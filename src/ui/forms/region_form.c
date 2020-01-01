@@ -18,8 +18,8 @@ void region_form_construct(state_t* state) {
 	field[0] = new_field(1, 10, 4, 18, 0, 0);
 	field[1] = NULL;
 
-	set_field_back(field[0], A_UNDERLINE);    /* Print a line for the option 	*/
-	field_opts_off(field[0], O_AUTOSKIP);    /* Don't go to next field when this */
+	set_field_back(field[0], A_UNDERLINE);
+	field_opts_off(field[0], O_AUTOSKIP);
 
 	form_win = derwin(state->win, LINES, COLS, 0, 0);
 
@@ -28,14 +28,34 @@ void region_form_construct(state_t* state) {
 	set_form_sub(my_form, form_win);
 
 	post_form(my_form);
-	wrefresh(state->win);
+
+
+	DBORDER(state->win);
+	DBORDER(form_win);
 
 	mvwprintw(state->win, 4, 12, "Name :");
+	mvwprintw(state->win, 0, 4, "Add a new %s", "Region");
+
+	mvwprintw(state->win, LINES - 2, 2, "^X - Save and add");
+	mvwprintw(state->win, LINES - 3, 2, "^D - Cancel");
+
+
+	form_driver(my_form, REQ_NEXT_FIELD);
+	form_driver(my_form, REQ_PREV_FIELD);
 	wrefresh(state->win);
 
 	while ((ch = wgetch(state->win))) {
 		switch (ch) {
+			case ctrl('d'):
+				((REGION*) state->fs.data)->id_region = INT_MAX;
+				goto end;
 			case ctrl('x'):
+				form_driver(my_form, REQ_NEXT_FIELD);
+				form_driver(my_form, REQ_PREV_FIELD);
+				((REGION*) state->fs.data)->id_region = 0;
+				strncpy(((REGION*) state->fs.data)->name, trimws(field_buffer(field[0], 0)), 255);
+				// strncpy(((REGION*) state->fs.data)->name, "trimws(field_buffer(field[0], 0))", 255);
+				fprintf(stderr, "%s\n",((REGION*) state->fs.data)->name);
 				goto end;
 			case KEY_DOWN:
 				form_driver(my_form, REQ_NEXT_FIELD);
@@ -53,9 +73,6 @@ void region_form_construct(state_t* state) {
 		}
 	}
 	end:;
-	form_driver(my_form, REQ_NEXT_FIELD);
-	form_driver(my_form, REQ_PREV_FIELD);
-	strncpy(state->fs.region.name, field_buffer(field[0], 0), 255);
 
 	unpost_form(my_form);
 	free_form(my_form);

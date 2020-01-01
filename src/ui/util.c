@@ -5,23 +5,23 @@
 #include "ui/util.h"
 
 char* trimws(char* strp) {
-	char *end;
+	char* end;
 
 	// trim leading space
-	while(isspace(*strp))
+	while (isspace(*strp))
 		strp++;
 
-	if(*strp == 0) // all spaces?
+	if (*strp == 0) // all spaces?
 		return strp;
 
 	// trim trailing space
 	end = strp + strnlen(strp, 128) - 1;
 
-	while(end > strp && isspace(*end))
+	while (end > strp && isspace(*end))
 		end--;
 
 	// write new null terminator
-	*(end+1) = '\0';
+	*(end + 1) = '\0';
 
 	return strp;
 }
@@ -90,6 +90,35 @@ void res_to_list(SQL_RESULT* res, alist_t* list) {
 	// clean memory without freeing references within structures
 	// they will be used by newly copied elements in the list
 	mysql_res_free_noref(&res);
+}
+
+int type_get_id(void* elem, list_type_e list_type) {
+	switch (list_type) {
+		case REGION_TYPE:
+			return ((REGION*) elem)->id_region;
+		case MUNICIPALITY_TYPE:
+			return ((MUNICIPALITY*) elem)->id_municipality;
+		case ADDRESS_TYPE:
+			return ((ADDRESS*) elem)->id_address;
+		case LIBRARY_TYPE:
+			return ((LIBRARY*) elem)->id_library;
+		case EMPLOYEE_TYPE:
+			return ((EMPLOYEE*) elem)->id_employee;
+		case PERSON_TYPE:
+			return ((PERSON*) elem)->id_person;
+		case AUTHOR_TYPE:
+			return ((AUTHOR*) elem)->id_author;
+		case AUTHOR_BOOK_TYPE:
+			return ((AUTHOR_BOOK*) elem)->id_author_book;
+		case BOOK_TYPE:
+			return ((BOOK*) elem)->id_book;
+		case BOOK_SPECIMEN_TYPE:
+			return ((BOOK_SPECIMEN*) elem)->id_book_specimen;
+		case READER_TYPE:
+			return ((READER*) elem)->id_reader;
+		case RENT_TYPE:
+			return ((RENT*) elem)->id_rent;
+	}
 }
 
 void type_free(void* elem, list_type_e list_type) {
