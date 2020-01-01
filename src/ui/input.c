@@ -20,7 +20,6 @@ void root_ctx_handler(state_t* state, int input, volatile int* running) {
 }
 
 void list_ctx_handler(state_t* state, int input) {
-	int (*func)(void*);
 	switch (input) {
 		case 'q':
 			delete_state_ctx(state);
@@ -69,9 +68,17 @@ void list_ctx_handler(state_t* state, int input) {
 			break;
 		case 'c':
 			state->child = create_state_ctx(state, FORM_CTX);
-			if (type_get_id(state->child->fs.data, state->child->fs.type) == 0) {
-				func = type_insert_action(state->child->fs.type);
-				func(state->child->fs.data);
+			form_set_type(state->child, FORM_CREATE);
+			if (state->child->fs.data && type_get_id(state->child->fs.data, state->child->fs.type) == 0) {
+				type_insert_action(state->child->fs.type)(state->child->fs.data);
+			}
+			delete_state_ctx(state->child);
+			break;
+		case 'a':
+			state->child = create_state_ctx(state, FORM_CTX);
+			form_set_type(state->child, FORM_UPDATE);
+			if (state->child->fs.data && type_get_id(state->child->fs.data, state->child->fs.type) != 0) {
+				type_update_action(state->child->fs.type)(state->child->fs.data);
 			}
 			delete_state_ctx(state->child);
 			break;

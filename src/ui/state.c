@@ -62,45 +62,8 @@ state_t* append_list_ctx(state_t* state) {
 state_t* append_form_ctx(state_t* state) {
 	state->ctx = FORM_CTX;
 	state->fs.type = state->parent->ls.type;
-	switch (state->fs.type) {
-		case REGION_TYPE:
-			state->fs.data = calloc(1, sizeof(REGION));
-			region_form_construct(state);
-			break;
-		case MUNICIPALITY_TYPE:
-			state->fs.data = calloc(1, sizeof(MUNICIPALITY));
-			break;
-		case ADDRESS_TYPE:
-			state->fs.data = calloc(1, sizeof(ADDRESS));
-			break;
-		case LIBRARY_TYPE:
-			state->fs.data = calloc(1, sizeof(LIBRARY));
-			break;
-		case EMPLOYEE_TYPE:
-			state->fs.data = calloc(1, sizeof(EMPLOYEE));
-			break;
-		case PERSON_TYPE:
-			state->fs.data = calloc(1, sizeof(PERSON));
-			break;
-		case AUTHOR_TYPE:
-			state->fs.data = calloc(1, sizeof(AUTHOR));
-			break;
-		case AUTHOR_BOOK_TYPE:
-			state->fs.data = calloc(1, sizeof(AUTHOR_BOOK));
-			break;
-		case BOOK_TYPE:
-			state->fs.data = calloc(1, sizeof(BOOK));
-			break;
-		case BOOK_SPECIMEN_TYPE:
-			state->fs.data = calloc(1, sizeof(BOOK_SPECIMEN));
-			break;
-		case READER_TYPE:
-			state->fs.data = calloc(1, sizeof(READER));
-			break;
-		case RENT_TYPE:
-			state->fs.data = calloc(1, sizeof(RENT));
-			break;
-	}
+	state->fs.ftype = FORM_CREATE;
+	state->fs.data = NULL;
 	return state;
 }
 

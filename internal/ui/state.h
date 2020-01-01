@@ -66,11 +66,16 @@ enum payload {
 	POPUP_PLOAD
 };
 
+
+enum form_type {
+	FORM_CREATE,
+	FORM_UPDATE
+};
 typedef enum context ctx_e;
 
 typedef enum list_type list_type_e;
 
-typedef enum list_type form_type_e;
+typedef enum form_type form_type_e;
 
 struct list_state {
 	int sel_idx;
@@ -89,22 +94,9 @@ struct popup_state {
 };
 
 struct form_state {
-	form_type_e type;
+	list_type_e type;
+	form_type_e ftype;
 	void* data;
-	// union DATA {
-	// 	REGION* region;
-	// 	MUNICIPALITY* municipality;
-	// 	ADDRESS* address;
-	// 	LIBRARY* library;
-	// 	EMPLOYEE* employee;
-	// 	PERSON* person;
-	// 	AUTHOR* author;
-	// 	AUTHOR_BOOK* author_book;
-	// 	BOOK* book;
-	// 	BOOK_SPECIMEN* book_specimen;
-	// 	READER* reader;
-	// 	RENT* rent;
-	// } data;
 };
 
 struct state {

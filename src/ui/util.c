@@ -92,6 +92,37 @@ void res_to_list(SQL_RESULT* res, alist_t* list) {
 	mysql_res_free_noref(&res);
 }
 
+unsigned long type_get_size(list_type_e type) {
+	switch (type) {
+		case REGION_TYPE:
+			return sizeof(REGION);
+		case MUNICIPALITY_TYPE:
+			return sizeof(MUNICIPALITY);
+		case ADDRESS_TYPE:
+			return sizeof(ADDRESS);
+		case LIBRARY_TYPE:
+			return sizeof(LIBRARY);
+		case EMPLOYEE_TYPE:
+			return sizeof(EMPLOYEE);
+		case PERSON_TYPE:
+			return sizeof(PERSON);
+		case AUTHOR_TYPE:
+			return sizeof(AUTHOR);
+		case AUTHOR_BOOK_TYPE:
+			return sizeof(AUTHOR_BOOK);
+		case BOOK_TYPE:
+			return sizeof(BOOK);
+		case BOOK_SPECIMEN_TYPE:
+			return sizeof(BOOK_SPECIMEN);
+		case READER_TYPE:
+			return sizeof(READER);
+		case RENT_TYPE:
+			return sizeof(RENT);
+		default:
+			return 0;
+	}
+}
+
 int type_get_id(void* elem, list_type_e list_type) {
 	switch (list_type) {
 		case REGION_TYPE:
