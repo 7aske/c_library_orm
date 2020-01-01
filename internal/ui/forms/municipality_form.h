@@ -1,9 +1,9 @@
 //
-// Created by nik on 12/30/19.
+// Created by nik on 1/1/20.
 //
 
-#ifndef IT350_PZ_APP_REGION_FORM_H
-#define IT350_PZ_APP_REGION_FORM_H
+#ifndef IT350_PZ_APP_MUNICIPALITY_FORM_H
+#define IT350_PZ_APP_MUNICIPALITY_FORM_H
 
 #pragma once
 
@@ -18,6 +18,6 @@
 #define DBORDER(win) wborder(win, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
 
 
-void region_form_construct(state_t* state);
+void municipality_form_construct(state_t* state);
 
-#endif //IT350_PZ_APP_REGION_FORM_H
+#endif //IT350_PZ_APP_MUNICIPALITY_FORM_H

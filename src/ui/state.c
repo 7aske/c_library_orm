@@ -17,7 +17,6 @@ void delete_state_ctx(state_t* state) {
 	state->win = NULL;
 	window_count--;
 	switch (state->ctx) {
-
 		case ROOT_CTX:
 			break;
 		case WINDOW_CTX:
@@ -28,7 +27,7 @@ void delete_state_ctx(state_t* state) {
 			break;
 		case FORM_CTX:
 			if (state->fs.data != NULL) {
-				free(state->fs.data);
+				type_free(state->fs.data, state->fs.type);
 			}
 			break;
 		case POPUP_CTX:

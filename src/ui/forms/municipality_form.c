@@ -1,29 +1,36 @@
 //
-// Created by nik on 12/30/19.
+// Created by nik on 1/1/20.
 //
 
-#include "ui/forms/region_form.h"
+#include "ui/forms/municipality_form.h"
 
 #define ctrl(x)           ((x) & 0x1f)
 
-void region_form_construct(state_t* state) {
+void municipality_form_construct(state_t* state) {
+	#define FIELDS 3
 	assert(state->ctx == FORM_CTX);
-	FIELD* field[2];
+	FIELD* field[FIELDS];
 	FORM* my_form;
 	WINDOW* form_win;
 	int ch;
+	char buf[12];
 
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
 
 	field[0] = new_field(1, 20, 4, 18, 0, 0);
-	field[1] = NULL;
+	field[1] = new_field(1, 20, 5, 18, 0, 0);
+	field[2] = NULL;
 
-	set_field_back(field[0], A_UNDERLINE);
-	field_opts_off(field[0], O_AUTOSKIP);
+	for (int i = 0; i < FIELDS; i++) {
+		set_field_back(field[i], A_UNDERLINE);
+		field_opts_off(field[i], O_AUTOSKIP);
+	}
 
 	if (state->fs.ftype == FORM_UPDATE) {
-		set_field_buffer(field[0], 0, ((REGION*) state->fs.data)->name);
+		set_field_buffer(field[0], 0, ((MUNICIPALITY*) state->fs.data)->name);
+		snprintf(buf, 11, "%d", ((MUNICIPALITY*) state->fs.data)->region->id_region);
+		set_field_buffer(field[1], 0, buf);
 	}
 
 	form_win = derwin(state->win, LINES, COLS, 0, 0);
@@ -39,10 +46,11 @@ void region_form_construct(state_t* state) {
 	DBORDER(form_win);
 
 	mvwprintw(state->win, 4, 10, "Name   :");
+	mvwprintw(state->win, 5, 10, "Region :");
 
 	if (state->fs.ftype == FORM_UPDATE) {
 		mvwprintw(state->win, 0, 4, "Update %s ID = %d", list_type_str(state->fs.type),
-				  ((REGION*) state->fs.data)->id_region);
+				  ((MUNICIPALITY*) state->fs.data)->id_municipality);
 	} else {
 		mvwprintw(state->win, 0, 4, "Add a new %s", list_type_str(state->fs.type));
 	}
@@ -52,25 +60,30 @@ void region_form_construct(state_t* state) {
 	form_driver(my_form, REQ_FIRST_FIELD);
 	form_driver(my_form, REQ_END_LINE);
 	wrefresh(state->win);
-
+	long id;
+	REGION* regionptr;
 	while ((ch = wgetch(state->win))) {
 		switch (ch) {
 			case ctrl('d'):
 
 				if (state->fs.ftype == FORM_UPDATE) {
-					((REGION*) state->fs.data)->id_region = 0;
+					((MUNICIPALITY*) state->fs.data)->id_municipality = 0;
 				} else {
-					((REGION*) state->fs.data)->id_region = INT_MAX;
+					((MUNICIPALITY*) state->fs.data)->id_municipality = INT_MAX;
 				}
 				goto end;
 			case ctrl('x'):
 				form_driver(my_form, REQ_PREV_FIELD);
 				form_driver(my_form, REQ_NEXT_FIELD);
 				if (state->fs.ftype == FORM_CREATE) {
-					((REGION*) state->fs.data)->id_region = 0;
+					((MUNICIPALITY*) state->fs.data)->id_municipality = 0;
 				}
-				strncpy(((REGION*) state->fs.data)->name, trimws(field_buffer(field[0], 0)), 255);
+				strncpy(((MUNICIPALITY*) state->fs.data)->name, trimws(field_buffer(field[0], 0)), 255);
+				id = strtol(trimws(field_buffer(field[1], 0)), NULL, 10);
+				regionptr = region_find_by_id(id);
+				((MUNICIPALITY*) state->fs.data)->region = regionptr;
 				goto end;
+			case KEY_STAB:
 			case KEY_DOWN:
 				form_driver(my_form, REQ_NEXT_FIELD);
 				form_driver(my_form, REQ_END_LINE);
@@ -89,6 +102,7 @@ void region_form_construct(state_t* state) {
 				form_driver(my_form, REQ_DEL_PREV);
 			case KEY_DC:
 				form_driver(my_form, REQ_DEL_CHAR);
+				break;
 			default:
 				form_driver(my_form, ch);
 				break;
@@ -98,6 +112,9 @@ void region_form_construct(state_t* state) {
 
 	unpost_form(my_form);
 	free_form(my_form);
-	free_field(field[0]);
+	for (int j = 0; j < FIELDS; ++j) {
+		free_field(field[j]);
+	}
 	delwin(form_win);
+	#undef FIELDS
 }

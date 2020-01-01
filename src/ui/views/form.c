@@ -20,8 +20,7 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 			region_form_construct(state);
 			break;
 		case MUNICIPALITY_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			municipality_form_construct(state);
 			break;
 		case ADDRESS_TYPE:
 			free(state->fs.data);
@@ -66,3 +65,16 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 	}
 	return state;
 }
+
+void print_form_footer(WINDOW* win) {
+	int y, x;
+	getmaxyx(win, y, x);
+	wmove(win, y - 2, 1);
+	wattron(win, COLOR_PAIR(3));
+	for (int j = 0; j < x - 2; ++j) {
+		waddch(win, ' ');
+	}
+	mvwprintw(win, y - 2, 2, "^X - Commit | ^D Discard");
+	wattroff(win, COLOR_PAIR(3));
+}
+
