@@ -69,8 +69,7 @@ void mysql_res_free_noref(SQL_RESULT** res) {
 		free(*res);
 		*res = NULL;
 	}
-} 
-
+}
 void mysql_res_free(SQL_RESULT** res) {
 	assert(res != NULL);
 	SQL_RESULT_ROW* curr;
@@ -79,7 +78,7 @@ void mysql_res_free(SQL_RESULT** res) {
 
 	if (*res != NULL) {
 		switch((*res)->type){
-
+		
 			case ADDRESS_E:
 			free_func = (void (*)(void**)) address_free;
 			break;
@@ -120,7 +119,7 @@ void mysql_res_free(SQL_RESULT** res) {
 		curr = (*res)->results;
 		while (curr != NULL) {
 			assert(free_func != NULL);
-
+			
 			prev = curr;
 			curr = curr->next;
 			free_func(&prev->data);
@@ -130,4 +129,5 @@ void mysql_res_free(SQL_RESULT** res) {
 		*res = NULL;
 	}
 
-}
+} 
+	

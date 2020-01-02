@@ -11,7 +11,7 @@ void root_ctx_handler(state_t* state, int input, volatile int* running) {
 			break;
 		case 'l':
 			state->child = create_state_ctx(state, LIST_CTX);
-			change_list(state->child, 0);
+			change_list(state->child, 0, state->conn);
 			break;
 		case 'p':
 			state->child = create_state_ctx(state, POPUP_CTX);
@@ -42,7 +42,7 @@ void list_ctx_handler(state_t* state, int input) {
 			break;
 		case KEY_LEFT:
 			if (state->ls.type >= 0) {
-				change_list(state, -1);
+				change_list(state, -1, state->conn);
 				state->ls.line_pos = 0;
 				state->ls.sel_idx = 0;
 			}
@@ -50,7 +50,7 @@ void list_ctx_handler(state_t* state, int input) {
 			break;
 		case KEY_RIGHT:
 			if (state->ls.type < ETYPE_LEN) {
-				change_list(state, 1);
+				change_list(state, 1, state->conn);
 				state->ls.line_pos = 0;
 				state->ls.sel_idx = 0;
 			}
@@ -64,7 +64,7 @@ void list_ctx_handler(state_t* state, int input) {
 			break;
 		case 'l':
 			state->child = create_state_ctx(state, LIST_CTX);
-			change_list(state->child, 0);
+			change_list(state->child, 0, state->conn);
 			break;
 		case 'c':
 			state->child = create_state_ctx(state, FORM_CTX);
@@ -105,8 +105,6 @@ void popup_ctx_handler(state_t* state, int input) {
 		case 'n':
 			assert(state->parent != NULL);
 			state->parent->ptype = POPUP_PLOAD;
-			// state->parent->payload = malloc(1);
-			// *(char*) state->parent->payload = 0;
 			delete_state_ctx(state);
 			break;
 	}

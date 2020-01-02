@@ -4,7 +4,7 @@
 
 #include "ui/views/list.h"
 
-void change_list(state_t* state, int inc) {
+void change_list(state_t* state, int inc, MYSQL* conn) {
 	if (state->ls.list != NULL) {
 		list_free_noref(&state->ls.list, state->ls.type);
 	}
@@ -18,51 +18,51 @@ void change_list(state_t* state, int inc) {
 	switch (state->ls.type) {
 		case MUNICIPALITY_TYPE:
 			state->ls.list = alist_new(sizeof(MUNICIPALITY));
-			res_to_list(municipality_find_all(), state->ls.list);
+			res_to_list(municipality_find_all(conn), state->ls.list);
 			break;
 		case ADDRESS_TYPE:
 			state->ls.list = alist_new(sizeof(ADDRESS));
-			res_to_list(address_find_all(), state->ls.list);
+			res_to_list(address_find_all(conn), state->ls.list);
 			break;
 		case REGION_TYPE:
 			state->ls.list = alist_new(sizeof(REGION));
-			res_to_list(region_find_all(), state->ls.list);
+			res_to_list(region_find_all(conn), state->ls.list);
 			break;
 		case LIBRARY_TYPE:
 			state->ls.list = alist_new(sizeof(LIBRARY));
-			res_to_list(library_find_all(), state->ls.list);
+			res_to_list(library_find_all(conn), state->ls.list);
 			break;
 		case AUTHOR_TYPE:
 			state->ls.list = alist_new(sizeof(AUTHOR));
-			res_to_list(author_find_all(), state->ls.list);
+			res_to_list(author_find_all(conn), state->ls.list);
 			break;
 		case AUTHOR_BOOK_TYPE:
 			state->ls.list = alist_new(sizeof(AUTHOR_BOOK));
-			res_to_list(author_book_find_all(), state->ls.list);
+			res_to_list(author_book_find_all(conn), state->ls.list);
 			break;
 		case BOOK_TYPE:
 			state->ls.list = alist_new(sizeof(BOOK));
-			res_to_list(book_find_all(), state->ls.list);
+			res_to_list(book_find_all(conn), state->ls.list);
 			break;
 		case BOOK_SPECIMEN_TYPE:
 			state->ls.list = alist_new(sizeof(BOOK_SPECIMEN));
-			res_to_list(book_specimen_find_all(), state->ls.list);
+			res_to_list(book_specimen_find_all(conn), state->ls.list);
 			break;
 		case EMPLOYEE_TYPE:
 			state->ls.list = alist_new(sizeof(EMPLOYEE));
-			res_to_list(employee_find_all(), state->ls.list);
+			res_to_list(employee_find_all(conn), state->ls.list);
 			break;
 		case PERSON_TYPE:
 			state->ls.list = alist_new(sizeof(PERSON));
-			res_to_list(person_find_all(), state->ls.list);
+			res_to_list(person_find_all(conn), state->ls.list);
 			break;
 		case READER_TYPE:
 			state->ls.list = alist_new(sizeof(READER));
-			res_to_list(reader_find_all(), state->ls.list);
+			res_to_list(reader_find_all(conn), state->ls.list);
 			break;
 		case RENT_TYPE:
 			state->ls.list = alist_new(sizeof(RENT));
-			res_to_list(rent_find_all(), state->ls.list);
+			res_to_list(rent_find_all(conn), state->ls.list);
 			break;
 	}
 }

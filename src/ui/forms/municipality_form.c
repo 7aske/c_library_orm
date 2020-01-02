@@ -4,7 +4,6 @@
 
 #include "ui/forms/municipality_form.h"
 
-#define ctrl(x)           ((x) & 0x1f)
 
 void municipality_form_construct(state_t* state) {
 	#define FIELDS 3
@@ -64,8 +63,11 @@ void municipality_form_construct(state_t* state) {
 	REGION* regionptr;
 	while ((ch = wgetch(state->win))) {
 		switch (ch) {
+			case ctrl('l'):
+				state->child = create_state_ctx(state, LIST_CTX);
+				change_list(state->child, 0, state->conn);
+				break;
 			case ctrl('d'):
-
 				if (state->fs.ftype == FORM_UPDATE) {
 					((MUNICIPALITY*) state->fs.data)->id_municipality = 0;
 				} else {
@@ -80,7 +82,7 @@ void municipality_form_construct(state_t* state) {
 				}
 				strncpy(((MUNICIPALITY*) state->fs.data)->name, trimws(field_buffer(field[0], 0)), 255);
 				id = strtol(trimws(field_buffer(field[1], 0)), NULL, 10);
-				regionptr = region_find_by_id(id);
+				regionptr = region_find_by_id(state->conn, id);
 				((MUNICIPALITY*) state->fs.data)->region = regionptr;
 				goto end;
 			case KEY_STAB:

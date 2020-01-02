@@ -8,7 +8,7 @@
 #include "ui/state.h"
 #include "ui/format.h"
 
-void change_list(state_t* state, int inc);
+void change_list(state_t* state, int inc, MYSQL* conn);
 
 void print_list_item(WINDOW* win, int row, int col, void* curr, enum list_type type, int k);
 

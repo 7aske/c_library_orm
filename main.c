@@ -9,6 +9,7 @@
 
 volatile static int running = true;
 
+
 void abrtendwin(int signum) {
 	if (signum == SIGABRT || signum == SIGSEGV) {
 		endwin();
@@ -42,7 +43,10 @@ int main() {
 		if (state.win == NULL) {
 			running = false;
 		}
+
 	}
+	if (state.conn != NULL)
+		mysql_close(state.conn);
 
 	return 0;
 }

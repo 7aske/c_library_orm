@@ -18,6 +18,7 @@ static unsigned short APP_ROW = 24;
 
 static short window_count = 0;
 
+
 #define ETYPE_LEN 12
 
 #define POPUP_QSIZE 128
@@ -101,6 +102,7 @@ struct form_state {
 
 struct state {
 	char title[16];
+	MYSQL* conn;
 	WINDOW* win;
 	enum context ctx;
 

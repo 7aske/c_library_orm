@@ -12,6 +12,7 @@
 #include <form.h>
 
 #include "ui/views/form.h"
+#include "ui/input.h"
 #include "ui/state.h"
 
 

@@ -13,7 +13,9 @@
 #include "ui/forms/region_form.h"
 #include "ui/views/form.h"
 
-#define ctrl(ch)           ((ch) & 0x1f)
+#ifndef ctrl
+#define ctrl(x)           ((x) & 0x1f)
+#endif
 
 void root_ctx_handler(state_t* state, int input, volatile int* running);
 

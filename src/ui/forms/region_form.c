@@ -4,8 +4,6 @@
 
 #include "ui/forms/region_form.h"
 
-#define ctrl(x)           ((x) & 0x1f)
-
 void region_form_construct(state_t* state) {
 	assert(state->ctx == FORM_CTX);
 	FIELD* field[2];
@@ -54,9 +52,9 @@ void region_form_construct(state_t* state) {
 	wrefresh(state->win);
 
 	while ((ch = wgetch(state->win))) {
+		form_ctx_handler(state, ch);
 		switch (ch) {
 			case ctrl('d'):
-
 				if (state->fs.ftype == FORM_UPDATE) {
 					((REGION*) state->fs.data)->id_region = 0;
 				} else {

@@ -174,7 +174,7 @@ class Struct:
 					if (is_null[{index}]) {{
 						(({name}*) row->data)->{col_name} = NULL;
 					}} else {{
-						(({name}*) row->data)->{col_name} = {col_name}_find_by_id({col}_buffer);
+						(({name}*) row->data)->{col_name} = {col_name}_find_by_id(conn, {col}_buffer);
 					}}""".format(index=i, col=prop.name, col_name=prop.name.replace("_id", "").replace("id_", ""),
 				                 name=self.typedef_name)
 			else:
@@ -323,9 +323,9 @@ class Struct:
 					fprintf(stderr, "%s->%s is NULL\\n", "{name}", "{fk_name}");
 					return 0U;
 				}} else if ({name}T->{fk_name}->{fk_id} == 0) {{
-					{fk_name}_insert({name}T->{fk_name});
+					{fk_name}_insert(conn, {name}T->{fk_name});
 				}} else {{
-					{fk_name}_update({name}T->{fk_name});
+					{fk_name}_update(conn, {name}T->{fk_name});
 				}}""".format(name=self.name, fk_name=prop.name.replace("_id", "").replace("id_", ""), fk_id=prop.name)
 		return out
 

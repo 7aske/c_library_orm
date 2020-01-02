@@ -3,11 +3,12 @@
 
 
 void init_state(state_t* state) {
-	static const char* title = "APP";
+	static const char* title = "LIBRARY SYSTEM";
 	strncpy(state->title, title, 16);
 	state->win = NULL;
 	state->child = NULL;
 	state->parent = NULL;
+	state->conn = db_init();
 	state->ctx = ROOT_CTX;
 }
 
@@ -95,6 +96,7 @@ state_t* create_state_ctx(state_t* parent, ctx_e ctx) {
 	newstate->ctx = WINDOW_CTX;
 	newstate->child = NULL;
 	newstate->parent = parent;
+	newstate->conn = parent->conn;
 
 	switch (ctx) {
 		case ROOT_CTX:

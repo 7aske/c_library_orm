@@ -310,7 +310,8 @@ def delete_sql_string(struct: Struct):
 
 
 def declaration_execute_find(struct: Struct):
-	arg_list = [FunctionArgument("char const*", "query"),
+	arg_list = [FunctionArgument("MYSQL*", "conn"),
+	            FunctionArgument("char const*", "query"),
 	            FunctionArgument("MYSQL_BIND*", "params"),
 	            FunctionArgument("uint", "param_count")]
 	func = FunctionTemplate("{name}_execute_find".format(name=struct.name), "SQL_RESULT*", arg_list)
@@ -321,14 +322,13 @@ def body_execute_find(struct: Struct, func: FunctionTemplate):
 	func.add_macro_def(MacroDefinition("QUERY_SIZE", "512"))
 	func.add_macro_def(MacroDefinition("RES_COL_COUNT", str(struct.col_count())))
 	func.add_macro_def(MacroDefinition("BUFFER_SIZE", "255"))
-	func.add_block("""MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
+	func.add_block("""
 		SQL_RESULT* res;
 		MYSQL_RES* prepare_meta_result;
 		MYSQL_STMT* stmt;""")
+	func.add_block('\tif (conn == NULL) {\n\t\tconn = db_init();\n\t}\n')
 	func.add_block(struct.get_col_buffer_definitions())
-	func.add_block("""conn = db_init();
-			stmt = mysql_stmt_init(conn);
-		""")
+	func.add_block("stmt = mysql_stmt_init(conn);")
 	func.add_block("""if (mysql_stmt_prepare(stmt, query, strnlen(query, QUERY_SIZE))) {
 				fprintf(stderr, " mysql_stmt_prepare(), SELECT failed\\n");
 				fprintf(stderr, " %s\\n", mysql_stmt_error(stmt));
@@ -386,13 +386,15 @@ def body_execute_find(struct: Struct, func: FunctionTemplate):
 
 
 def declaration_find_by_id(struct: Struct):
-	arg_list = [FunctionArgument("uint", "id")]
+	arg_list = [FunctionArgument("MYSQL*", "conn"),
+	            FunctionArgument("uint", "id")]
 	return FunctionTemplate("{}_find_by_id".format(struct.name), "{}*".format(struct.typedef_name), arg_list)
 
 
 def body_find_by_id(struct: Struct, func: FunctionTemplate):
 	func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(find_by_id_sql_string(struct))))
 	func.add_macro_def(MacroDefinition("PARAM_COUNT", "1"))
+	func.add_block('\tif (conn == NULL) {\n\t\tconn = db_init();\n\t}\n')
 	func.add_block("{}* out;".format(struct.typedef_name))
 	func.add_block("""
 			SQL_RESULT* res;
@@ -401,7 +403,7 @@ def body_find_by_id(struct: Struct, func: FunctionTemplate):
 			struct {name}* {name}T = &{name};
 			""".format(name=struct.name, pk_name=struct.get_pk().name))
 	func.add_block(struct.get_col_param_buffer(["id_{}".format(struct.name)]))
-	func.add_block("res = {}_execute_find(QUERY, param, PARAM_COUNT);".format(struct.name))
+	func.add_block("res = {}_execute_find(conn, QUERY, param, PARAM_COUNT);".format(struct.name))
 	func.add_block(struct.col_param_buffer_free(1))
 	func.add_block("\tif (res->results == NULL) { return NULL; }")
 	func.add_block("""out = res->results->data;
@@ -418,7 +420,8 @@ def body_find_by_id(struct: Struct, func: FunctionTemplate):
 
 
 def declaration_find_all(struct: Struct):
-	return FunctionTemplate("{}_find_all".format(struct.name), "SQL_RESULT*".format(struct.typedef_name), [])
+	args = [FunctionArgument("MYSQL*", "conn")]
+	return FunctionTemplate("{}_find_all".format(struct.name), "SQL_RESULT*".format(struct.typedef_name), args)
 
 
 def body_find_all(struct: Struct, func: FunctionTemplate):
@@ -426,13 +429,15 @@ def body_find_all(struct: Struct, func: FunctionTemplate):
 	func.add_macro_def(MacroDefinition("PARAM_COUNT", str(0)))
 	func.add_block("SQL_RESULT* res;")
 	func.add_block("MYSQL_BIND param[1];")
-	func.add_block("res = {}_execute_find(QUERY, param, PARAM_COUNT);".format(struct.name))
+	func.add_block('\tif (conn == NULL) {\n\t\tconn = db_init();\n\t}\n')
+	func.add_block("res = {}_execute_find(conn, QUERY, param, PARAM_COUNT);".format(struct.name))
 	func.add_block("return res;")
 	return func
 
 
 def declaration_insert(struct: Struct):
-	arg_list = [FunctionArgument("{}*".format(struct.typedef_name), "{}T".format(struct.name))]
+	arg_list = [FunctionArgument("MYSQL*", "conn"),
+	            FunctionArgument("{}*".format(struct.typedef_name), "{}T".format(struct.name))]
 	return FunctionTemplate("{}_insert".format(struct.name), "uint", arg_list)
 
 
@@ -442,12 +447,12 @@ def body_insert(struct: Struct, func: FunctionTemplate):
 	func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(insert_sql_string(struct))))
 	func.add_macro_def(MacroDefinition("PARAM_COUNT", "{}".format(struct.param_count())))
 	func.add_block(struct.get_insert_assertions())
-	func.add_block("""MYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;
+	func.add_block("""
 				MYSQL_STMT* __attribute__((cleanup(mysql_stmt_cleanup))) stmt;
 				uint retval;
 				""")
-	func.add_block("""conn = db_init();
-				stmt = mysql_stmt_init(conn);""")
+	func.add_block('\tif (conn == NULL) {\n\t\tconn = db_init();\n\t}\n')
+	func.add_block('\tstmt = mysql_stmt_init(conn);\n')
 	func.add_block(struct.get_update_fk())
 	func.add_block(struct.col_param_lengths(func))
 	func.add_block(struct.get_col_param_buffers())
@@ -476,7 +481,8 @@ def body_insert(struct: Struct, func: FunctionTemplate):
 
 
 def declaration_update(struct: Struct):
-	arg_list = [FunctionArgument("{}*".format(struct.typedef_name), "{}T".format(struct.name))]
+	arg_list = [FunctionArgument("MYSQL*", "conn"),
+	            FunctionArgument("{}*".format(struct.typedef_name), "{}T".format(struct.name))]
 	return FunctionTemplate("{}_update".format(struct.name), "int", arg_list)
 
 
@@ -486,16 +492,18 @@ def body_update(struct: Struct, func: FunctionTemplate):
 	func.add_macro_def(MacroDefinition("QUERY", '"{}"'.format(update_sql_string(struct))))
 	func.add_macro_def(MacroDefinition("PARAM_COUNT", str(struct.col_count())))
 	func.add_macro_def(MacroDefinition("STRING_SIZE", "255"))
+	func.add_block('\tif (conn == NULL) {\n\t\tconn = db_init();\n\t}\n')
 	func.add_block("""int retval;""")
 	func.add_block(struct.col_update_params(func))
-	func.add_block("retval = {}_execute(QUERY, param, PARAM_COUNT);".format(struct.name))
+	func.add_block("retval = {}_execute(conn, QUERY, param, PARAM_COUNT);".format(struct.name))
 	func.add_block(struct.col_buffer_free())
 	func.add_block("return retval;")
 	return func
 
 
 def declaration_delete(struct: Struct):
-	arg_list = [FunctionArgument("{}*".format(struct.typedef_name), "{}T".format(struct.name))]
+	arg_list = [FunctionArgument("MYSQL*", "conn"),
+	            FunctionArgument("{}*".format(struct.typedef_name), "{}T".format(struct.name))]
 	return FunctionTemplate("{}_delete".format(struct.name), "int", arg_list)
 
 
@@ -504,9 +512,10 @@ def body_delete(struct: Struct, func: FunctionTemplate):
 	func.add_macro_def(MacroDefinition("PARAM_COUNT", str(1)))
 	if struct.get_pk() is not None:
 		func.add_block("assert({name}T->{pk_name} != 0);".format(name=struct.name, pk_name=struct.get_pk().name))
+	func.add_block('\tif (conn == NULL) {\n\t\tconn = db_init();\n\t}\n')
 	func.add_block("""int retval;""")
 	func.add_block(struct.get_col_param_buffer(["id_{}".format(struct.name)]))
-	func.add_block("retval = {}_execute(QUERY, param, PARAM_COUNT);".format(struct.name))
+	func.add_block("retval = {}_execute(conn, QUERY, param, PARAM_COUNT);".format(struct.name))
 	func.add_block(struct.col_param_buffer_free(1))
 
 	func.add_block("return retval;")
@@ -514,7 +523,8 @@ def body_delete(struct: Struct, func: FunctionTemplate):
 
 
 def declaration_execute(struct: Struct):
-	arg_list = [FunctionArgument("char const*", "query"),
+	arg_list = [FunctionArgument("MYSQL*", "conn"),
+	            FunctionArgument("char const*", "query"),
 	            FunctionArgument("MYSQL_BIND*", "params"),
 	            FunctionArgument("uint", "param_count")]
 	return FunctionTemplate("{name}_execute".format(name=struct.name), "int", arg_list)
@@ -522,9 +532,11 @@ def declaration_execute(struct: Struct):
 
 def body_execute(struct: Struct, func: FunctionTemplate):
 	# func = struct.declaration_execute()
+	func.add_block("/* Generated by body_execute */")
 	func.add_macro_def(MacroDefinition("QUERY_LENGTH", '512'))
-	func.add_block('\tMYSQL_STMT* stmt;\t\nMYSQL* __attribute__((cleanup(mysql_con_cleanup))) conn;\t\nint retval;')
-	func.add_block('\tconn = db_init();\t\nstmt = mysql_stmt_init(conn);')
+	func.add_block('\tMYSQL_STMT* stmt;\t\nint retval;')
+	func.add_block('\tif (conn == NULL) {\n\t\tconn = db_init();\n\t}\n')
+	func.add_block('\t\nstmt = mysql_stmt_init(conn);')
 	func.add_block("""if ((retval = mysql_stmt_prepare(stmt, query, strnlen(query, QUERY_LENGTH)))) {
 					fprintf(stderr, "mysql_stmt_prepare(), failed\\n");
 					fprintf(stderr, "%s\\n", mysql_error(conn));
