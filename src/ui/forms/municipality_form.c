@@ -2,7 +2,7 @@
 // Created by nik on 1/1/20.
 //
 
-#include "ui/forms/municipality_form.h"
+#include "ui/forms/forms.h"
 
 
 void municipality_form_construct(state_t* state) {
