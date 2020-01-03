@@ -91,7 +91,7 @@ struct popup_state {
 
 	void* arg;
 
-	int (* action)(void* arg);
+	int (* action)(MYSQL* conn, void* arg);
 };
 
 struct form_state {
@@ -121,7 +121,7 @@ struct state {
 typedef struct state state_t;
 
 #include "ui/util.h"
-#include "ui/forms/region_form.h"
+#include "ui/forms/forms.h"
 
 void init_state(state_t* state);
 

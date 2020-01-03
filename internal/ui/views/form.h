@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "ui/forms/region_form.h"
-#include "ui/forms/municipality_form.h"
+#include "ui/forms/forms.h"
 
 
 void form_add_data(state_t* state, void* data, size_t size);

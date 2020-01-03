@@ -32,10 +32,10 @@ int type_get_id(void* elem, list_type_e list_type);
 
 unsigned long type_get_size(list_type_e type);
 
-int (* type_delete_action(enum list_type type))(void* arg);
+int (* type_delete_action(enum list_type type))(MYSQL* conn, void* arg);
 
-int (* type_update_action(enum list_type type))(void* arg);
+int (* type_update_action(enum list_type type))(MYSQL* conn, void* arg);
 
-int (* type_insert_action(enum list_type type))(void* arg);
+int (* type_insert_action(enum list_type type))(MYSQL* conn, void* arg);
 
 #endif //IT350_PZ_APP_UTIL_H

@@ -69,16 +69,16 @@ void list_ctx_handler(state_t* state, int input) {
 		case 'c':
 			state->child = create_state_ctx(state, FORM_CTX);
 			form_set_type(state->child, FORM_CREATE);
-			if (state->child->fs.data && type_get_id(state->child->fs.data, state->child->fs.type) == 0) {
-				type_insert_action(state->child->fs.type)(state->child->fs.data);
+			if (state->child->fs.data != NULL && type_get_id(state->child->fs.data, state->child->fs.type) == 0) {
+				type_insert_action(state->child->fs.type)(state->conn, state->child->fs.data);
 			}
 			delete_state_ctx(state->child);
 			break;
 		case 'a':
 			state->child = create_state_ctx(state, FORM_CTX);
 			form_set_type(state->child, FORM_UPDATE);
-			if (state->child->fs.data && type_get_id(state->child->fs.data, state->child->fs.type) != 0) {
-				type_update_action(state->child->fs.type)(state->child->fs.data);
+			if (state->child->fs.data != NULL && type_get_id(state->child->fs.data, state->child->fs.type) != 0) {
+				type_update_action(state->child->fs.type)(state->conn, state->child->fs.data);
 			}
 			delete_state_ctx(state->child);
 			break;

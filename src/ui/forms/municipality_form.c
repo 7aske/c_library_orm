@@ -17,8 +17,8 @@ void municipality_form_construct(state_t* state) {
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
 
-	field[0] = new_field(1, 20, 4, 18, 0, 0);
-	field[1] = new_field(1, 20, 5, 18, 0, 0);
+	field[0] = new_field(1, 20, 4, 24, 0, 0);
+	field[1] = new_field(1, 20, 5, 24, 0, 0);
 	field[2] = NULL;
 
 	for (int i = 0; i < FIELDS; i++) {
@@ -44,8 +44,8 @@ void municipality_form_construct(state_t* state) {
 	DBORDER(state->win);
 	DBORDER(form_win);
 
-	mvwprintw(state->win, 4, 10, "Name   :");
-	mvwprintw(state->win, 5, 10, "Region :");
+	mvwprintw(state->win, 4, 10, "Name         :");
+	mvwprintw(state->win, 5, 10, "Region       :");
 
 	if (state->fs.ftype == FORM_UPDATE) {
 		mvwprintw(state->win, 0, 4, "Update %s ID = %d", list_type_str(state->fs.type),

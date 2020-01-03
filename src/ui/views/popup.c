@@ -13,7 +13,7 @@ void popup_set_question(state_t* state, const char* question) {
 int popup_action(state_t* state) {
 	assert(state->ctx == POPUP_CTX);
 	assert(state->ps.action != NULL);
-	int retval = (int) state->ps.action(state->ps.arg);
+	int retval = (int) state->ps.action(state->parent->conn, state->ps.arg);
 	state->ps.action = NULL;
 	state->ps.arg = NULL;
 	return retval;
