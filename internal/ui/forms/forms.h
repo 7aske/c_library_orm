@@ -29,4 +29,18 @@ void address_form_construct(state_t* state);
 
 void employee_form_construct(state_t* state);
 
+void library_form_construct(state_t* state);
+
+void author_form_construct(state_t* state);
+
+void author_book_form_construct(state_t* state);
+
+void book_form_construct(state_t* state);
+
+void book_specimen_form_construct(state_t* state);
+
+void reader_form_construct(state_t* state);
+
+void rent_form_construct(state_t* state);
+
 #endif //IT350_PZ_APP_FORMS_H

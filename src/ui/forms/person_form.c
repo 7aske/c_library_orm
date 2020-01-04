@@ -70,11 +70,11 @@ void person_form_construct(state_t* state) {
 			case ctrl('x'):
 				form_driver(my_form, REQ_PREV_FIELD);
 				form_driver(my_form, REQ_NEXT_FIELD);
-				strncpy(ptr->first_name, trimws(field_buffer(field[0], 0)),
+				strncpy(ptr->first_name, trimws(field_buffer(field[0], 0), sizeof(ptr->first_name)),
 						sizeof(ptr->first_name));
-				strncpy(ptr->last_name, trimws(field_buffer(field[1], 0)),
+				strncpy(ptr->last_name, trimws(field_buffer(field[1], 0), sizeof(ptr->last_name)),
 						sizeof(ptr->last_name));
-				strncpy(ptr->jmbg, trimws(field_buffer(field[2], 0)),
+				strncpy(ptr->jmbg, trimws(field_buffer(field[2], 0), sizeof(ptr->jmbg)),
 						sizeof(ptr->jmbg));
 
 				if (state->fs.ftype == FORM_CREATE) {

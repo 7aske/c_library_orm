@@ -4,19 +4,18 @@
 
 #include "ui/forms/forms.h"
 
-
-void address_form_construct(state_t* state) {
+void book_form_construct(state_t* state) {
 	#define FIELDS 3
-	#define BUFLEN 16
+	#define BUFLEN 12
 	assert(state->ctx == FORM_CTX);
 	FIELD* field[FIELDS + 1];
 	FORM* my_form;
 	WINDOW* form_win;
-	int ch, i, id;
-	char buf[BUFLEN];
+	int ch, i;
 	int (* action)(MYSQL*, void*) = NULL;
+	char datebuf[BUFLEN];
 
-	ADDRESS* ptr = (ADDRESS*) state->fs.data;
+	BOOK* ptr = (BOOK*) state->fs.data;
 
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
@@ -32,10 +31,10 @@ void address_form_construct(state_t* state) {
 	}
 
 	if (state->fs.ftype == FORM_UPDATE) {
-		snprintf(buf, BUFLEN, "%d", ptr->municipality->id_municipality);
-		set_field_buffer(field[0], 0, buf);
-		set_field_buffer(field[1], 0, ptr->street);
-		set_field_buffer(field[2], 0, ptr->number);
+		set_field_buffer(field[0], 0, ptr->isbn);
+		set_field_buffer(field[1], 0, ptr->name);
+		_fmt_date_buf(datebuf, &ptr->publish_date);
+		set_field_buffer(field[2], 0, datebuf);
 	}
 
 	form_win = derwin(state->win, LINES, COLS, 0, 0);
@@ -50,9 +49,9 @@ void address_form_construct(state_t* state) {
 	DBORDER(state->win);
 	DBORDER(form_win);
 
-	mvwprintw(state->win, 4, 10, "Municipality :");
-	mvwprintw(state->win, 5, 10, "Street Name  :");
-	mvwprintw(state->win, 6, 10, "Street Number:");
+	mvwprintw(state->win, 4, 10, "ISBN         :");
+	mvwprintw(state->win, 5, 10, "Book Name    :");
+	mvwprintw(state->win, 6, 10, "Publish Date :");
 
 	if (state->fs.ftype == FORM_UPDATE) {
 		mvwprintw(state->win, 0, 4, "Update %s ID = %d", list_type_str(state->fs.type),
@@ -67,7 +66,6 @@ void address_form_construct(state_t* state) {
 	form_driver(my_form, REQ_END_LINE);
 	wrefresh(state->win);
 
-
 	while ((ch = wgetch(state->win))) {
 		switch (ch) {
 			case ctrl('d'):
@@ -75,21 +73,20 @@ void address_form_construct(state_t* state) {
 			case ctrl('x'):
 				form_driver(my_form, REQ_PREV_FIELD);
 				form_driver(my_form, REQ_NEXT_FIELD);
+				strncpy(ptr->isbn, trimws(field_buffer(field[0], 0), sizeof(ptr->isbn)),
+						sizeof(ptr->isbn));
+				strncpy(ptr->name, trimws(field_buffer(field[1], 0), sizeof(ptr->name)),
+						sizeof(ptr->name));
 
-
-				strncpy(ptr->street, trimws(field_buffer(field[1], 0), sizeof(ptr->street)), sizeof(ptr->street));
-				strncpy(ptr->number, trimws(field_buffer(field[2], 0), sizeof(ptr->street)), sizeof(ptr->number));
-				id = (int) strtol(trimws(field_buffer(field[0], 0), BUFLEN), NULL, 10);
+				tmcpystr(&ptr->publish_date, trimws(field_buffer(field[2], 0), BUFLEN));
 
 				if (state->fs.ftype == FORM_CREATE) {
 					action = type_insert_action(state->fs.type);
-					ptr->id_address = 0;
-				} else if (state->fs.ftype == FORM_UPDATE) {
+					ptr->id_book = 0;
+				} else if (state->fs.ftype == FORM_CREATE) {
 					action = type_update_action(state->fs.type);
 					type_free_ref(ptr, state->fs.type);
 				}
-
-				ptr->municipality = municipality_find_by_id(state->conn, id);
 
 				if (action != NULL) {
 					action(state->conn, ptr);
@@ -128,6 +125,6 @@ void address_form_construct(state_t* state) {
 		free_field(field[i]);
 	}
 	delwin(form_win);
-	#undef FIELDS
 	#undef BUFLEN
+	#undef FIELDS
 }

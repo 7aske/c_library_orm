@@ -6,7 +6,7 @@
 
 void employee_form_construct(state_t* state) {
 	#define FIELDS 3
-	#define BUFLEN 255
+	#define BUFLEN 16
 	assert(state->ctx == FORM_CTX);
 	FIELD* field[FIELDS + 1];
 	FORM* my_form;
@@ -78,9 +78,9 @@ void employee_form_construct(state_t* state) {
 				form_driver(my_form, REQ_NEXT_FIELD);
 
 
-				id1 = (int) strtol(trimws(field_buffer(field[0], 0)), NULL, 10);
-				id2 = (int) strtol(trimws(field_buffer(field[1], 0)), NULL, 10);
-				strncpy(ptr->position, trimws(field_buffer(field[2], 0)), sizeof(ptr->position));
+				id1 = (int) strtol(trimws(field_buffer(field[0], 0), BUFLEN), NULL, 10);
+				id2 = (int) strtol(trimws(field_buffer(field[1], 0), BUFLEN), NULL, 10);
+				strncpy(ptr->position, trimws(field_buffer(field[2], 0), sizeof(ptr->position)), sizeof(ptr->position));
 
 				if (state->fs.ftype == FORM_CREATE) {
 					action = type_insert_action(state->fs.type);

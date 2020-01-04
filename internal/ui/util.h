@@ -14,13 +14,17 @@
 #include "ui/state.h"
 #include "structs/arraylist.h"
 
-char* trimws(char* strp);
+char* trimws(char* strp, int maxlen);
 
 const char* list_type_str(list_type_e type);
 
 void res_to_list(SQL_RESULT* res, alist_t* list);
 
 const char* _fmt_date(struct tm* ts);
+
+void _fmt_date_buf(char* buf, struct tm* ts);
+
+void tmcpystr(struct tm* ts, char* str);
 
 void type_free(void** elem, list_type_e list_type);
 

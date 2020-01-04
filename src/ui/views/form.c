@@ -28,8 +28,7 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 			address_form_construct(state);
 			break;
 		case LIBRARY_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			library_form_construct(state);
 			break;
 		case EMPLOYEE_TYPE:
 			employee_form_construct(state);
@@ -38,16 +37,13 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 			person_form_construct(state);
 			break;
 		case AUTHOR_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			author_form_construct(state);
 			break;
 		case AUTHOR_BOOK_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			author_book_form_construct(state);
 			break;
 		case BOOK_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			book_form_construct(state);
 			break;
 		case BOOK_SPECIMEN_TYPE:
 			free(state->fs.data);

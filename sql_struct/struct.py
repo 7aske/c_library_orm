@@ -273,7 +273,7 @@ class Struct:
 			reg_type = "DATE"
 			mysql_type = "MYSQL_TYPE_DATE"
 			buffer_size = "{}".format(prop.size)
-			out += "mysql_timecpy(param[{index}].buffer, &{name}T->{col});"
+			out += "memcpy(param[{index}].buffer, &{name}T->{col}, %d);" % prop.size
 		else:
 			msg = f"SQL type not handled '{prop}'"
 			assert False, msg

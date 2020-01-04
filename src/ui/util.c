@@ -4,7 +4,7 @@
 
 #include "ui/util.h"
 
-char* trimws(char* strp) {
+char* trimws(char* strp, int maxlen) {
 	char* end;
 
 	// trim leading space
@@ -15,7 +15,7 @@ char* trimws(char* strp) {
 		return strp;
 
 	// trim trailing space
-	end = strp + strnlen(strp, 128) - 1;
+	end = strp + strnlen(strp, maxlen) - 1;
 
 	while (end > strp && isspace(*end))
 		end--;
@@ -71,9 +71,21 @@ const char* list_type_str(list_type_e type) {
 
 const char* _fmt_date(struct tm* ts) {
 	#define DATE_FMT "%02d-%02d-%04d"
-	static char fmt[11];
-	sprintf(fmt, DATE_FMT, ts->tm_mday, ts->tm_mon, ts->tm_year);
+	static char fmt[12];
+	snprintf(fmt, 12, DATE_FMT, ts->tm_mday, ts->tm_mon, ts->tm_year);
 	return fmt;
+	#undef DATE_FMT
+}
+
+void _fmt_date_buf(char* buf, struct tm* ts) {
+	#define DATE_FMT "%02d-%02d-%04d"
+	snprintf(buf, 12, DATE_FMT, ts->tm_mday, ts->tm_mon, ts->tm_year);
+	#undef DATE_FMT
+}
+
+void tmcpystr(struct tm* ts, char* str) {
+	#define DATE_FMT "%02d-%02d-%04d"
+	sscanf(str, DATE_FMT, &ts->tm_mday, &ts->tm_mon, &ts->tm_year);
 	#undef DATE_FMT
 }
 

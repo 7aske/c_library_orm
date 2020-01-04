@@ -73,8 +73,8 @@ void municipality_form_construct(state_t* state) {
 				form_driver(my_form, REQ_PREV_FIELD);
 				form_driver(my_form, REQ_NEXT_FIELD);
 
-				strncpy(ptr->name, trimws(field_buffer(field[0], 0)), sizeof(ptr->name));
-				id = (int) strtol(trimws(field_buffer(field[1], 0)), NULL, 10);
+				strncpy(ptr->name, trimws(field_buffer(field[0], 0), sizeof(ptr->name)), sizeof(ptr->name));
+				id = (int) strtol(trimws(field_buffer(field[1], 0), BUFLEN), NULL, 10);
 
 				if (state->fs.ftype == FORM_CREATE) {
 					action = type_insert_action(state->fs.type);
