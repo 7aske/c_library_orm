@@ -25,4 +25,6 @@ void municipality_form_construct(state_t* state);
 
 void person_form_construct(state_t* state);
 
+void address_form_construct(state_t* state);
+
 #endif //IT350_PZ_APP_FORMS_H

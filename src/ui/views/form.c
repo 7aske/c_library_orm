@@ -11,9 +11,11 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 	assert(state->parent->ctx == LIST_CTX);
 	state->fs.ftype = ftype;
 	unsigned long size = type_get_size(state->fs.type);
-	state->fs.data = calloc(1, size);
 	if (ftype == FORM_UPDATE) {
-		form_add_data(state, alist_get(state->parent->ls.list, state->parent->ls.sel_idx), size);
+		// form_add_data(state, alist_get(state->parent->ls.list, state->parent->ls.sel_idx), size);
+		state->fs.data = alist_get(state->parent->ls.list, state->parent->ls.sel_idx);
+	} else {
+		state->fs.data = calloc(1, size);
 	}
 	switch (state->fs.type) {
 		case REGION_TYPE:
@@ -23,8 +25,7 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 			municipality_form_construct(state);
 			break;
 		case ADDRESS_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			address_form_construct(state);
 			break;
 		case LIBRARY_TYPE:
 			free(state->fs.data);

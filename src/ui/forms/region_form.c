@@ -10,6 +10,9 @@ void region_form_construct(state_t* state) {
 	FORM* my_form;
 	WINDOW* form_win;
 	int ch;
+	int (* action)(MYSQL*, void*) = NULL;
+
+	REGION* ptr = (REGION*) state->fs.data;
 
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
@@ -21,7 +24,7 @@ void region_form_construct(state_t* state) {
 	field_opts_off(field[0], O_AUTOSKIP);
 
 	if (state->fs.ftype == FORM_UPDATE) {
-		set_field_buffer(field[0], 0, ((REGION*) state->fs.data)->name);
+		set_field_buffer(field[0], 0, ptr->name);
 	}
 
 	form_win = derwin(state->win, LINES, COLS, 0, 0);
@@ -40,7 +43,7 @@ void region_form_construct(state_t* state) {
 
 	if (state->fs.ftype == FORM_UPDATE) {
 		mvwprintw(state->win, 0, 4, "Update %s ID = %d", list_type_str(state->fs.type),
-				  ((REGION*) state->fs.data)->id_region);
+				  type_get_id(ptr, state->fs.type));
 	} else {
 		mvwprintw(state->win, 0, 4, "Add a new %s", list_type_str(state->fs.type));
 	}
@@ -55,19 +58,24 @@ void region_form_construct(state_t* state) {
 		form_ctx_handler(state, ch);
 		switch (ch) {
 			case ctrl('d'):
-				if (state->fs.ftype == FORM_UPDATE) {
-					((REGION*) state->fs.data)->id_region = 0;
-				} else {
-					((REGION*) state->fs.data)->id_region = INT_MAX;
-				}
 				goto end;
 			case ctrl('x'):
 				form_driver(my_form, REQ_PREV_FIELD);
 				form_driver(my_form, REQ_NEXT_FIELD);
+
+				strncpy(ptr->name, trimws(field_buffer(field[0], 0)), sizeof(ptr->name));
+
 				if (state->fs.ftype == FORM_CREATE) {
-					((REGION*) state->fs.data)->id_region = 0;
+					action = type_insert_action(state->fs.type);
+					ptr->id_region = 0;
+				} else if (state->fs.ftype == FORM_UPDATE) {
+					action = type_update_action(state->fs.type);
+					type_free_ref(ptr, state->fs.type);
 				}
-				strncpy(((REGION*) state->fs.data)->name, trimws(field_buffer(field[0], 0)), 255);
+
+				if (action != NULL) {
+					action(state->conn, ptr);
+				}
 				goto end;
 			case KEY_DOWN:
 				form_driver(my_form, REQ_NEXT_FIELD);

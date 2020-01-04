@@ -18,19 +18,24 @@ void delete_state_ctx(state_t* state) {
 	state->win = NULL;
 	window_count--;
 	switch (state->ctx) {
-		case ROOT_CTX:
-			break;
-		case WINDOW_CTX:
-			break;
 		case LIST_CTX:
 			if (state->ls.list != NULL)
 				list_free_noref(&state->ls.list, state->ls.type);
 			break;
 		case FORM_CTX:
 			if (state->fs.data != NULL) {
-				type_free(state->fs.data, state->fs.type);
+				if (state->fs.ftype == FORM_UPDATE) {
+
+				} else {
+					if (type_get_id(state->fs.data, state->fs.type) != 0) {
+						type_free_ref(state->fs.data, state->fs.type);
+					}
+					free(state->fs.data);
+				}
 			}
 			break;
+		case ROOT_CTX:
+		case WINDOW_CTX:
 		case POPUP_CTX:
 			break;
 	}

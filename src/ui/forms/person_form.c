@@ -6,12 +6,14 @@
 
 void person_form_construct(state_t* state) {
 	#define FIELDS 3
-	#define BUFLEN 32
 	assert(state->ctx == FORM_CTX);
 	FIELD* field[FIELDS + 1];
 	FORM* my_form;
 	WINDOW* form_win;
-	int ch;
+	int ch, i;
+	int (* action)(MYSQL*, void*) = NULL;
+
+	PERSON* ptr = (PERSON*) state->fs.data;
 
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
@@ -21,15 +23,15 @@ void person_form_construct(state_t* state) {
 	field[2] = new_field(1, 20, 6, 24, 0, 0);
 	field[3] = NULL;
 
-	for (int i = 0; i < FIELDS; i++) {
+	for (i = 0; i < FIELDS; i++) {
 		set_field_back(field[i], A_UNDERLINE);
 		field_opts_off(field[i], O_AUTOSKIP);
 	}
 
 	if (state->fs.ftype == FORM_UPDATE) {
-		set_field_buffer(field[0], 0, ((PERSON*) state->fs.data)->first_name);
-		set_field_buffer(field[1], 0, ((PERSON*) state->fs.data)->last_name);
-		set_field_buffer(field[2], 0, ((PERSON*) state->fs.data)->jmbg);
+		set_field_buffer(field[0], 0, ptr->first_name);
+		set_field_buffer(field[1], 0, ptr->last_name);
+		set_field_buffer(field[2], 0, ptr->jmbg);
 	}
 
 	form_win = derwin(state->win, LINES, COLS, 0, 0);
@@ -50,7 +52,7 @@ void person_form_construct(state_t* state) {
 
 	if (state->fs.ftype == FORM_UPDATE) {
 		mvwprintw(state->win, 0, 4, "Update %s ID = %d", list_type_str(state->fs.type),
-				  ((PERSON*) state->fs.data)->id_person);
+				  type_get_id(ptr, state->fs.type));
 	} else {
 		mvwprintw(state->win, 0, 4, "Add a new %s", list_type_str(state->fs.type));
 	}
@@ -64,21 +66,28 @@ void person_form_construct(state_t* state) {
 	while ((ch = wgetch(state->win))) {
 		switch (ch) {
 			case ctrl('d'):
-				if (state->fs.ftype == FORM_UPDATE) {
-					((PERSON*) state->fs.data)->id_person = 0;
-				} else {
-					((PERSON*) state->fs.data)->id_person = INT_MAX;
-				}
 				goto end;
 			case ctrl('x'):
 				form_driver(my_form, REQ_PREV_FIELD);
 				form_driver(my_form, REQ_NEXT_FIELD);
+				strncpy(ptr->first_name, trimws(field_buffer(field[0], 0)),
+						sizeof(ptr->first_name));
+				strncpy(ptr->last_name, trimws(field_buffer(field[1], 0)),
+						sizeof(ptr->last_name));
+				strncpy(ptr->jmbg, trimws(field_buffer(field[2], 0)),
+						sizeof(ptr->jmbg));
+
 				if (state->fs.ftype == FORM_CREATE) {
-					((PERSON*) state->fs.data)->id_person = 0;
+					action = type_insert_action(state->fs.type);
+					ptr->id_person = 0;
+				} else if (state->fs.ftype == FORM_CREATE) {
+					action = type_update_action(state->fs.type);
+					type_free_ref(ptr, state->fs.type);
 				}
-				strncpy(((PERSON*) state->fs.data)->first_name, trimws(field_buffer(field[0], 0)), 255);
-				strncpy(((PERSON*) state->fs.data)->last_name, trimws(field_buffer(field[1], 0)), 255);
-				strncpy(((PERSON*) state->fs.data)->jmbg, trimws(field_buffer(field[2], 0)), 13);
+
+				if (action != NULL) {
+					action(state->conn, ptr);
+				}
 				goto end;
 			case KEY_STAB:
 			case KEY_DOWN:
@@ -109,10 +118,9 @@ void person_form_construct(state_t* state) {
 
 	unpost_form(my_form);
 	free_form(my_form);
-	for (int j = 0; j < FIELDS; ++j) {
-		free_field(field[j]);
+	for (i = 0; i < FIELDS; ++i) {
+		free_field(field[i]);
 	}
 	delwin(form_win);
-	#undef BUFLEN
 	#undef FIELDS
 }

@@ -216,7 +216,7 @@ void print_list_footer(WINDOW* win) {
 	wattron(win, COLOR_PAIR(3));
 	mvwprintw(win, y - 2, 12, "UPDATE");
 	wattron(win, COLOR_PAIR(4));
-	mvwprintw(win, y - 2, 18, "(a)");
+	mvwprintw(win, y - 2, 18, "(e)");
 	wattron(win, COLOR_PAIR(3));
 	mvwprintw(win, y - 2, 22, "DELETE");
 	wattron(win, COLOR_PAIR(4));
