@@ -29,6 +29,8 @@ class SqlColumn:
 		self.name = name
 		self.proptype = proptype
 		self.size = size
+		if proptype in [SqlType.VARCHAR, SqlType.TEXT]:
+			self.size += 1  # adjusting for the '\0' character needed in C strings
 
 	def __repr__(self):
 		return "<PropType name: {:10} proptype: {:16} size: {:4}>".format(self.name, self.proptype, self.size)
