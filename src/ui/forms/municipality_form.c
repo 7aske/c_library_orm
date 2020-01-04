@@ -7,7 +7,7 @@
 
 void municipality_form_construct(state_t* state) {
 	#define FIELDS 2
-	#define BUFLEN 255
+	#define BUFLEN 16
 	assert(state->ctx == FORM_CTX);
 	FIELD* field[FIELDS + 1];
 	FORM* my_form;

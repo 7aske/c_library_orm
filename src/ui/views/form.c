@@ -32,8 +32,7 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 			state->fs.data = NULL;
 			break;
 		case EMPLOYEE_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			employee_form_construct(state);
 			break;
 		case PERSON_TYPE:
 			person_form_construct(state);

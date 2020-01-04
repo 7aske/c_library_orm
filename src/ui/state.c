@@ -24,9 +24,7 @@ void delete_state_ctx(state_t* state) {
 			break;
 		case FORM_CTX:
 			if (state->fs.data != NULL) {
-				if (state->fs.ftype == FORM_UPDATE) {
-
-				} else {
+				if (state->fs.ftype == FORM_CREATE) {
 					if (type_get_id(state->fs.data, state->fs.type) != 0) {
 						type_free_ref(state->fs.data, state->fs.type);
 					}

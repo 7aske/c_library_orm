@@ -4,19 +4,19 @@
 
 #include "ui/forms/forms.h"
 
-
-void address_form_construct(state_t* state) {
+void employee_form_construct(state_t* state) {
 	#define FIELDS 3
-	#define BUFLEN 16
+	#define BUFLEN 255
 	assert(state->ctx == FORM_CTX);
 	FIELD* field[FIELDS + 1];
 	FORM* my_form;
 	WINDOW* form_win;
-	int ch, i, id;
-	char buf[BUFLEN];
+	int ch, i, id1, id2;
+	char buf1[BUFLEN];
+	char buf2[BUFLEN];
 	int (* action)(MYSQL*, void*) = NULL;
 
-	ADDRESS* ptr = (ADDRESS*) state->fs.data;
+	EMPLOYEE* ptr = (EMPLOYEE*) state->fs.data;
 
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
@@ -32,10 +32,11 @@ void address_form_construct(state_t* state) {
 	}
 
 	if (state->fs.ftype == FORM_UPDATE) {
-		snprintf(buf, BUFLEN, "%d", ptr->municipality->id_municipality);
-		set_field_buffer(field[0], 0, buf);
-		set_field_buffer(field[1], 0, ptr->street);
-		set_field_buffer(field[2], 0, ptr->number);
+		snprintf(buf1, BUFLEN, "%d", ptr->person->id_person);
+		set_field_buffer(field[0], 0, buf1);
+		snprintf(buf2, BUFLEN, "%d", ptr->library->id_library);
+		set_field_buffer(field[1], 0, buf2);
+		set_field_buffer(field[2], 0, ptr->position);
 	}
 
 	form_win = derwin(state->win, LINES, COLS, 0, 0);
@@ -50,9 +51,9 @@ void address_form_construct(state_t* state) {
 	DBORDER(state->win);
 	DBORDER(form_win);
 
-	mvwprintw(state->win, 4, 10, "Municipality :");
-	mvwprintw(state->win, 5, 10, "Street Name  :");
-	mvwprintw(state->win, 6, 10, "Street Number:");
+	mvwprintw(state->win, 4, 10, "Person       :");
+	mvwprintw(state->win, 5, 10, "Library      :");
+	mvwprintw(state->win, 6, 10, "Position     :");
 
 	if (state->fs.ftype == FORM_UPDATE) {
 		mvwprintw(state->win, 0, 4, "Update %s ID = %d", list_type_str(state->fs.type),
@@ -77,19 +78,20 @@ void address_form_construct(state_t* state) {
 				form_driver(my_form, REQ_NEXT_FIELD);
 
 
-				strncpy(ptr->street, trimws(field_buffer(field[1], 0)), sizeof(ptr->street));
-				strncpy(ptr->number, trimws(field_buffer(field[2], 0)), sizeof(ptr->number));
-				id = (int) strtol(trimws(field_buffer(field[0], 0)), NULL, 10);
+				id1 = (int) strtol(trimws(field_buffer(field[0], 0)), NULL, 10);
+				id2 = (int) strtol(trimws(field_buffer(field[1], 0)), NULL, 10);
+				strncpy(ptr->position, trimws(field_buffer(field[2], 0)), sizeof(ptr->position));
 
 				if (state->fs.ftype == FORM_CREATE) {
 					action = type_insert_action(state->fs.type);
-					ptr->id_address = 0;
+					ptr->id_employee = 0;
 				} else if (state->fs.ftype == FORM_UPDATE) {
 					action = type_update_action(state->fs.type);
 					type_free_ref(ptr, state->fs.type);
 				}
 
-				ptr->municipality = municipality_find_by_id(state->conn, id);
+				ptr->person = person_find_by_id(state->conn, id1);
+				ptr->library = library_find_by_id(state->conn, id2);
 
 				if (action != NULL) {
 					action(state->conn, ptr);
