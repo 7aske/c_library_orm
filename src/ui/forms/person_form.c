@@ -5,21 +5,20 @@
 #include "ui/forms/forms.h"
 
 void person_form_construct(state_t* state) {
-	#define FIELDS 4
+	#define FIELDS 3
 	#define BUFLEN 32
 	assert(state->ctx == FORM_CTX);
-	FIELD* field[FIELDS];
+	FIELD* field[FIELDS + 1];
 	FORM* my_form;
 	WINDOW* form_win;
 	int ch;
-	char buf[BUFLEN];
 
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
 
 	field[0] = new_field(1, 20, 4, 24, 0, 0);
 	field[1] = new_field(1, 20, 5, 24, 0, 0);
-	field[2] = new_field(1, 20, 5, 24, 0, 0);
+	field[2] = new_field(1, 20, 6, 24, 0, 0);
 	field[3] = NULL;
 
 	for (int i = 0; i < FIELDS; i++) {
@@ -64,10 +63,6 @@ void person_form_construct(state_t* state) {
 
 	while ((ch = wgetch(state->win))) {
 		switch (ch) {
-			case ctrl('l'):
-				state->child = create_state_ctx(state, LIST_CTX);
-				change_list(state->child, 0, state->conn);
-				break;
 			case ctrl('d'):
 				if (state->fs.ftype == FORM_UPDATE) {
 					((PERSON*) state->fs.data)->id_person = 0;
@@ -83,7 +78,7 @@ void person_form_construct(state_t* state) {
 				}
 				strncpy(((PERSON*) state->fs.data)->first_name, trimws(field_buffer(field[0], 0)), 255);
 				strncpy(((PERSON*) state->fs.data)->last_name, trimws(field_buffer(field[1], 0)), 255);
-				strncpy(((PERSON*) state->fs.data)->last_name, trimws(field_buffer(field[2], 0)), 255);
+				strncpy(((PERSON*) state->fs.data)->jmbg, trimws(field_buffer(field[2], 0)), 13);
 				goto end;
 			case KEY_STAB:
 			case KEY_DOWN:

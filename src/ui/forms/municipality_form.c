@@ -6,13 +6,14 @@
 
 
 void municipality_form_construct(state_t* state) {
-	#define FIELDS 3
+	#define FIELDS 2
+	#define BUFLEN 255
 	assert(state->ctx == FORM_CTX);
-	FIELD* field[FIELDS];
+	FIELD* field[FIELDS + 1];
 	FORM* my_form;
 	WINDOW* form_win;
 	int ch;
-	char buf[12];
+	char buf[BUFLEN];
 
 	state->win = newwin(LINES, COLS, 0, 0);
 	keypad(state->win, TRUE);
@@ -28,7 +29,7 @@ void municipality_form_construct(state_t* state) {
 
 	if (state->fs.ftype == FORM_UPDATE) {
 		set_field_buffer(field[0], 0, ((MUNICIPALITY*) state->fs.data)->name);
-		snprintf(buf, 11, "%d", ((MUNICIPALITY*) state->fs.data)->region->id_region);
+		snprintf(buf, BUFLEN, "%d", ((MUNICIPALITY*) state->fs.data)->region->id_region);
 		set_field_buffer(field[1], 0, buf);
 	}
 
@@ -63,10 +64,6 @@ void municipality_form_construct(state_t* state) {
 	REGION* regionptr;
 	while ((ch = wgetch(state->win))) {
 		switch (ch) {
-			case ctrl('l'):
-				state->child = create_state_ctx(state, LIST_CTX);
-				change_list(state->child, 0, state->conn);
-				break;
 			case ctrl('d'):
 				if (state->fs.ftype == FORM_UPDATE) {
 					((MUNICIPALITY*) state->fs.data)->id_municipality = 0;
@@ -80,7 +77,7 @@ void municipality_form_construct(state_t* state) {
 				if (state->fs.ftype == FORM_CREATE) {
 					((MUNICIPALITY*) state->fs.data)->id_municipality = 0;
 				}
-				strncpy(((MUNICIPALITY*) state->fs.data)->name, trimws(field_buffer(field[0], 0)), 255);
+				strncpy(((MUNICIPALITY*) state->fs.data)->name, trimws(field_buffer(field[0], 0)), BUFLEN);
 				id = strtol(trimws(field_buffer(field[1], 0)), NULL, 10);
 				regionptr = region_find_by_id(state->conn, id);
 				((MUNICIPALITY*) state->fs.data)->region = regionptr;
@@ -119,4 +116,5 @@ void municipality_form_construct(state_t* state) {
 	}
 	delwin(form_win);
 	#undef FIELDS
+	#undef BUFLEN
 }

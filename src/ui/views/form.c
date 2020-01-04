@@ -4,7 +4,7 @@
 void form_add_data(state_t* state, void* data, size_t size) {
 	assert(state->ctx == FORM_CTX);
 	assert(state->fs.ftype == FORM_UPDATE);
-	memcpy(state->fs.data, data, type_get_size(state->fs.type));
+	memcpy(state->fs.data, data, size);
 }
 
 state_t* form_set_type(state_t* state, form_type_e ftype) {
@@ -35,8 +35,7 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 			state->fs.data = NULL;
 			break;
 		case PERSON_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			person_form_construct(state);
 			break;
 		case AUTHOR_TYPE:
 			free(state->fs.data);

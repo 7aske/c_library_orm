@@ -28,7 +28,8 @@ void delete_state_ctx(state_t* state) {
 			break;
 		case FORM_CTX:
 			if (state->fs.data != NULL) {
-				type_free(state->fs.data, state->fs.type);
+				type_free_ref(state->fs.data, state->fs.type);
+				free(state->fs.data);
 			}
 			break;
 		case POPUP_CTX:

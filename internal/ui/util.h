@@ -22,7 +22,7 @@ void res_to_list(SQL_RESULT* res, alist_t* list);
 
 const char* _fmt_date(struct tm* ts);
 
-void type_free(void* elem, list_type_e list_type);
+void type_free(void** elem, list_type_e list_type);
 
 void type_free_ref(void* elem, list_type_e list_type);
 

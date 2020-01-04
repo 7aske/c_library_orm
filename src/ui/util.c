@@ -119,7 +119,8 @@ unsigned long type_get_size(list_type_e type) {
 		case RENT_TYPE:
 			return sizeof(RENT);
 		default:
-			return 0;
+			perror("Unknown type to get size.");
+			abort();
 	}
 }
 
@@ -152,43 +153,43 @@ int type_get_id(void* elem, list_type_e list_type) {
 	}
 }
 
-void type_free(void* elem, list_type_e list_type) {
+void type_free(void** elem, list_type_e list_type) {
 	switch (list_type) {
 		case MUNICIPALITY_TYPE:
-			municipality_free((MUNICIPALITY**) &elem);
+			municipality_free((MUNICIPALITY**) elem);
 			break;
 		case ADDRESS_TYPE:
-			address_free((ADDRESS**) &elem);
+			address_free((ADDRESS**) elem);
 			break;
 		case REGION_TYPE:
-			region_free((REGION**) &elem);
+			region_free((REGION**) elem);
 			break;
 		case LIBRARY_TYPE:
-			library_free((LIBRARY**) &elem);
+			library_free((LIBRARY**) elem);
 			break;
 		case AUTHOR_TYPE:
-			author_free((AUTHOR**) &elem);
+			author_free((AUTHOR**) elem);
 			break;
 		case AUTHOR_BOOK_TYPE:
-			author_book_free((AUTHOR_BOOK**) &elem);
+			author_book_free((AUTHOR_BOOK**) elem);
 			break;
 		case BOOK_TYPE:
-			book_free((BOOK**) &elem);
+			book_free((BOOK**) elem);
 			break;
 		case BOOK_SPECIMEN_TYPE:
-			book_specimen_free((BOOK_SPECIMEN**) &elem);
+			book_specimen_free((BOOK_SPECIMEN**) elem);
 			break;
 		case EMPLOYEE_TYPE:
-			employee_free((EMPLOYEE**) &elem);
+			employee_free((EMPLOYEE**) elem);
 			break;
 		case PERSON_TYPE:
-			person_free((PERSON**) &elem);
+			person_free((PERSON**) elem);
 			break;
 		case READER_TYPE:
-			reader_free((READER**) &elem);
+			reader_free((READER**) elem);
 			break;
 		case RENT_TYPE:
-			rent_free((RENT**) &elem);
+			rent_free((RENT**) elem);
 			break;
 	}
 }

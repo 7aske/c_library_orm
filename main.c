@@ -9,7 +9,6 @@
 
 volatile static int running = true;
 
-
 void abrtendwin(int signum) {
 	if (signum == SIGABRT || signum == SIGSEGV) {
 		endwin();
