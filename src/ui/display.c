@@ -8,15 +8,14 @@ void display(state_t* state) {
 		case ROOT_CTX:
 			display_root(state);
 			break;
-		case WINDOW_CTX:
-			break;
-		case FORM_CTX:
-			break;
 		case POPUP_CTX:
 			display_popup(state);
 			break;
 		case LIST_CTX:
 			display_list(state);
+			break;
+		case WINDOW_CTX:
+		case FORM_CTX:
 			break;
 	}
 	DBORDER(state->win)

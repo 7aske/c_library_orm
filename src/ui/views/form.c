@@ -46,16 +46,13 @@ state_t* form_set_type(state_t* state, form_type_e ftype) {
 			book_form_construct(state);
 			break;
 		case BOOK_SPECIMEN_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			book_specimen_form_construct(state);
 			break;
 		case READER_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			reader_form_construct(state);
 			break;
 		case RENT_TYPE:
-			free(state->fs.data);
-			state->fs.data = NULL;
+			rent_form_construct(state);
 			break;
 	}
 	return state;
