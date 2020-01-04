@@ -83,7 +83,7 @@ void book_form_construct(state_t* state) {
 				if (state->fs.ftype == FORM_CREATE) {
 					action = type_insert_action(state->fs.type);
 					ptr->id_book = 0;
-				} else if (state->fs.ftype == FORM_CREATE) {
+				} else if (state->fs.ftype == FORM_UPDATE) {
 					action = type_update_action(state->fs.type);
 					type_free_ref(ptr, state->fs.type);
 				}

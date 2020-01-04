@@ -84,7 +84,7 @@ void _fmt_date_buf(char* buf, struct tm* ts) {
 }
 
 void tmcpystr(struct tm* ts, char* str) {
-	#define DATE_FMT "%02d-%02d-%04d"
+	#define DATE_FMT "%d-%d-%d"
 	sscanf(str, DATE_FMT, &ts->tm_mday, &ts->tm_mon, &ts->tm_year);
 	#undef DATE_FMT
 }
