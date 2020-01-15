@@ -14,11 +14,17 @@ const outfilename = filename.replace(path.extname(filename), ".json");
 let sql;
 
 sql = fs.readFileSync(filename).toString();
+sql = sql.replace(/real/mgi, "float");
 sql = sql.replace(/^--.*$/mg, '');
 sql = sql.replace(/^INSERT.+$/mgi, '');
 sql = sql.replace(/^SET.+$/mgi, '');
 sql = sql.replace(/^\/\*.+$/mgi, '');
 sql = sql.replace(/^\(.+$/mgi, '');
+sql = sql.replace(/^CREATE DATABASE.+$/mgi, '');
+sql = sql.replace(/^CREATE USER.+$/mgi, '');
+sql = sql.replace(/^USE.+$/mgi, '');
+sql = sql.replace(/^GRANT.+$/mgi, '');
+
 parser.feed(sql);
 
 const parsedJsonFormat = parser.results;

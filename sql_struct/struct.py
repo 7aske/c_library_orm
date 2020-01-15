@@ -58,6 +58,8 @@ class Struct:
 			return "uint {name};".format(name=prop.name)
 		elif prop.proptype == SqlType.DATE:
 			return "struct tm {name};".format(name=prop.name)
+		elif prop.proptype == SqlType.FLOAT:
+			return "float {name};".format(name=prop.name)
 		else:
 			msg = f"SQL type not handled '{prop}'"
 			assert False, msg
@@ -131,6 +133,10 @@ class Struct:
 		elif prop.proptype in [SqlType.LONG, SqlType.FK_LONG, SqlType.PK_LONG]:
 			reg_type = "INTEGER"
 			mysql_type = "MYSQL_TYPE_LONG"
+
+		elif prop.proptype in [SqlType.FLOAT]:
+			reg_type = "FLOAT"
+			mysql_type = "MYSQL_TYPE_FLOAT"
 		else:
 			msg = f"SQL type not handled '{prop}'"
 			assert False, msg
@@ -162,7 +168,7 @@ class Struct:
 					}} else {{
 						mysql_timecpystr(&(({name}*) row->data)->{col}, {col}_buffer);
 					}}""".format(index=i, col=prop.name, name=self.typedef_name)
-			elif prop.proptype in [SqlType.LONG, SqlType.PK_LONG]:
+			elif prop.proptype in [SqlType.LONG, SqlType.PK_LONG, SqlType.FLOAT]:
 				cols += """
 					if (is_null[{index}]) {{
 						(({name}*) row->data)->{col} = 0;
@@ -257,7 +263,7 @@ class Struct:
 			out += """param[{index}].buffer_length = {col}_len;
 				strncpy(param[{index}].buffer, {name}T->{col}, {col}_len);"""
 
-		elif prop.proptype in [SqlType.LONG, SqlType.PK_LONG]:
+		elif prop.proptype in [SqlType.LONG, SqlType.PK_LONG, SqlType.FLOAT]:
 			reg_type = "INTEGER"
 			mysql_type = "MYSQL_TYPE_LONG"
 			buffer_size = "sizeof(uint)"

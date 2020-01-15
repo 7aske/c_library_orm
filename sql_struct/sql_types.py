@@ -8,6 +8,7 @@ class SqlType(enum.Enum):
 	PK_LONG = 4,
 	DATE = 5,
 	TEXT = 6,
+	FLOAT = 7,
 
 	def tostring(self):
 		if self == SqlType.PK_LONG:
@@ -22,6 +23,8 @@ class SqlType(enum.Enum):
 			return "MYSQL_TYPE_DATE"
 		if self == SqlType.TEXT:
 			return "MYSQL_TYPE_STRING"
+		if self == SqlType.FLOAT:
+			return "MYSQL_TYPE_FLOAT"
 
 
 class SqlColumn:

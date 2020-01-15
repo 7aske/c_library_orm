@@ -18,10 +18,10 @@ proj_name = ""
 
 def main():
 	global proj_name
-	out_dir = ".."
-	# out_dir = "dist"
+	# out_dir = ".."
+	out_dir = "dist"
 
-	inp_file = "ddl/library.sql"
+	inp_file = "ddl/aircompany.sql"
 
 	assert exists(inp_file)
 
@@ -54,6 +54,8 @@ def main():
 			else:
 				if "fractional" in column["type"].keys() and col_type in ["date", "time"]:
 					col_size = 56
+				elif col_type == "float":
+					col_size = 4
 				else:
 					msg = f"SQL type size not handled '{col_name}' in struct '{struct_name}'"
 					assert False, msg
@@ -70,6 +72,8 @@ def main():
 				col_type_sql = SqlType.LONG
 			elif col_type == "date":
 				col_type_sql = SqlType.DATE
+			elif col_type == "float":
+				col_type_sql = SqlType.FLOAT
 			else:
 				msg = f"SQL type not handled '{col_type}' in struct '{struct_name}'"
 				assert False, msg
